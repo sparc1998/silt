@@ -1,0 +1,5 @@
+To use SiLT, perform the following commands:
+
+./configure.pl --prefix=<install dir>
+make
+make install
