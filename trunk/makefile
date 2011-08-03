@@ -45,6 +45,8 @@ clean: $(foreach d,$(SUBDIRS),$(d)/clean)
 
 install: installdirs $(foreach d,$(SUBDIRS),$(d)/install)
 
+deps:
+
 archive:
 	rm -rf temp/$(ARCHIVE_NAME) temp/$(ARCHIVE_NAME).tgz
 	mkdir temp/$(ARCHIVE_NAME)

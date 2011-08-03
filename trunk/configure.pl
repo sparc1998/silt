@@ -34,6 +34,8 @@ sub main{
   print FH "\n";
   print FH "SYS_LDFLAGS :=\n";
   close FH;
+
+  `make deps > /dev/null 2>&1`;
 }
 
 sub parsecla{
