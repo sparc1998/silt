@@ -31,6 +31,10 @@ CPP2D =		@set -e; rm -f $(1);					\
 		rm -f $(1).$$$$
 C2O =		$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $(1) $(2)
 GEN_EXE =	$(CC) -o $(1) $(2) $(LDFLAGS)
+INSTALL_EXE =	cp $(1) $(BIN_DIR);					\
+		chmod 755 $(BIN_DIR)/$(notdir $(1))
+INSTALL_H =	cp $(1) $(INCLUDE_DIR);					\
+		chmod 644 $(INCLUDE_DIR)/$(notdir $(1))
 
 # Make all the default target
 all:

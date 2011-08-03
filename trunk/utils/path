@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+
+# enable perl's safety info
+use strict;
+use warnings;
+
+use Env;
+Env::import();
+
+if($#ARGV >= 0){ usage(); exit(0); }
+
+my @paths = split /:/, $PATH;
+my $i;
+for($i=0; $i<=$#paths; $i++){
+  print $paths[$i] . "\n";
+}
+
+sub usage{
+  print "USAGE: path [OPTIONS]
+DESCRIPTION: Print each directory in the PATH variable to a different line.
+OPTIONS:
+  --help,-h           print this message
+";
+}
