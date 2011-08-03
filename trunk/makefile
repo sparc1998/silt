@@ -45,6 +45,17 @@ clean: $(foreach d,$(SUBDIRS),$(d)/clean)
 
 install: installdirs $(foreach d,$(SUBDIRS),$(d)/install)
 
+archive:
+	rm -rf temp/$(ARCHIVE_NAME) temp/$(ARCHIVE_NAME).tgz
+	mkdir temp/$(ARCHIVE_NAME)
+	cp -a `find . -maxdepth 1 -mindepth 1 | grep -v ./temp`		\
+	temp/$(ARCHIVE_NAME)
+	rm -rf `find temp/$(ARCHIVE_NAME) -name .svn`
+	cd temp/$(ARCHIVE_NAME); ./configure.pl; make clean
+	rm -f temp/$(ARCHIVE_NAME)/system.mk
+	rm -f `find temp/$(ARCHIVE_NAME) -name "*.d"`
+	cd temp; tar cfz $(ARCHIVE_NAME).tgz $(ARCHIVE_NAME)
+
 installdirs:
 	mkdir -p $(INCLUDE_DIR)
 	chmod 755 $(INCLUDE_DIR)

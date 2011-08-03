@@ -10,6 +10,7 @@ my $verbose = 0;
 my $prefix = "/dev/null";
 my $debugBuild = 0;
 my $optLevel = 2;
+my $archivename = "silt";
 
 main();
 exit(0);
@@ -25,6 +26,7 @@ sub main{
 
   open FH, '> system.mk' or die "Unable to open system.mk";
   print FH "PREFIX := " . $prefix . "\n";
+  print FH "ARCHIVE_NAME := " . $archivename . "\n";
   print FH "SYS_CPPFLAGS :=\n";
   print FH "SYS_CFLAGS :=";
   if($debugBuild){ print FH " -g"; }
@@ -38,6 +40,7 @@ sub parsecla{
   foreach my $arg (@ARGV){
     if($arg =~ /^-/){
       if($arg eq "-h" || $arg eq "--help"){ usage(); exit(0); }
+      elsif($arg =~ /^--archivename=(.+)/){ $archivename = $1; }
       elsif($arg eq "--debug-build"){ $debugBuild = 1; }
       elsif($arg =~ /^--opt=(0|1|2|3)$/){ $optLevel = $1; }
       elsif($arg =~ /^--prefix=(.+)/){ $prefix = $1; }
@@ -54,10 +57,11 @@ sub usage{
 DESCRIPTION: Configure the build environment
 
 OPTIONS:
-  -h|--help       print this message
-  --debug-build   enable a debug build
-  --opt=[0,1,2,3] set the build optimization level; the default is 2
-  --prefix=<dir>  set the installation directory
-  --verbose       enable output verbosity
+  -h|--help            print this message
+  --archivename=<str>  define an archive name; the default is silt
+  --debug-build        enable a debug build
+  --opt=[0,1,2,3]      set the build optimization level; the default is 2
+  --prefix=<dir>       set the installation directory
+  --verbose            enable output verbosity
 ";
 }
