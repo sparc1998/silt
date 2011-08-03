@@ -1,0 +1,101 @@
+#!/usr/bin/env perl
+
+# enable perl's safety info
+use strict;
+use warnings;
+
+# globals
+my $search = "";
+my @ignoreDirs;
+my @ignoreFileTypes;
+my @fileExts;
+my $verbosity = 0;
+my @files;
+my $grep = "grep -H -n";
+
+parsecla();
+my $exclude = "";
+my $dir;
+my $f;
+foreach $dir (@ignoreDirs){
+  if($dir =~ /^\.\//){ $exclude = $exclude . " -type d -wholename " . $dir; }
+  else{ $exclude = $exclude . " -type d -name " . $dir; }
+  $exclude = $exclude . " -prune -o";
+}
+foreach $f (@ignoreFileTypes){
+  $exclude = $exclude . " -type f -name \"*." . $f . "\" -prune -o";
+}
+my $cmd = "";
+if($#fileExts == -1){
+  $cmd = "find" . $exclude . " \\( -type f -print \\)";
+}
+else{
+  $cmd = "find" . $exclude . " \\( -type f \\(";
+  my $ext;
+  my $j;
+  for($j=0; $j <= $#fileExts; ++$j){
+    if($j > 0){ $cmd = $cmd . " -o"; }
+    $cmd = $cmd . " -name \"*." . $fileExts[$j] . "\"";
+  }
+  $cmd = $cmd . " \\) -print \\)";
+}
+@files = split /\n/, runcmd($cmd);
+if($verbosity >= 2){
+  print "Will search these files ...\n";
+  foreach $f (@files){
+    print "  [" . $f . "]\n";
+  }
+}
+foreach $f (@files){
+  system($grep . " " . $search . " " . $f);
+}
+exit(0);
+
+sub runcmd{
+  my $cmd = shift(@_);
+  if($verbosity >= 1){ print "CMD: " . $cmd . "\n"; }
+  return `$cmd`;
+}
+
+sub parsecla{
+  my $arg;
+  foreach $arg(@ARGV){
+    if($arg eq "--help" || $arg eq "-h"){ usage(); exit(0); }
+    elsif($arg =~ /--verbosity=(\d+)/){ $verbosity = $1; }
+    elsif($arg =~ /^--ignore-dir=(.+)/){ push(@ignoreDirs, (split /,/, $1)); }
+    elsif($arg =~ /^--ignore-ft=(.+)/){
+      push(@ignoreFileTypes, (split /,/, $1));
+    }
+    elsif($arg =~ /^--accept-ft=(.+)/){ push(@fileExts, (split /,/, $1)); }
+    elsif($arg eq "--files-only"){ $grep = $grep . " -l"; }
+    elsif($arg eq "--case-insensitive"){ $grep = $grep . " -i"; }
+    elsif($arg eq "--regex"){ $grep = $grep . " -E"; }
+    elsif($arg =~ /^-/){
+      print "Illegal argument: " . $arg . "\n";
+      usage();
+      exit(1);
+    }
+    elsif($search eq ""){ $search = $arg; }
+    else{ print "Too many positional arguments\n"; usage(); exit(1); }
+  }
+
+  if($search eq ""){ print "No search specified\n"; usage(); exit(1); }
+}
+
+sub usage{
+  print "USAGE: grep-recursive [OPTIONS] <search>
+DESCRIPTION: Recursively grep for <search>.
+OPTIONS:
+  --help,-h           print this message
+  --accept-ft=<list>  only consider files with the listed extensions
+  --case-insensitive  search is case insensitive
+  --files-only        only list files with matches
+  --ignore-dir=<list> ignore files in the specified list of directories; any
+                      directory matching a name in the list will be ignored
+                      unless the item starts './', in which case only a
+                      directory with the full path will be ignored
+  --ignore-ft=<list>  ignore files with the listed extensions
+  --regex             treat search as a regular expression
+  --verbosity=<0-2>   enable verbosity
+";
+}

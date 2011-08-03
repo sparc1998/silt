@@ -1,17 +1,18 @@
 D := runcmd
 
-$(D)/all: $(D)/runcmd
+$(D)_EXES := $(D)/runcmd
+
+$(D)/all: $($(D)_EXES)
 
 $(D)/clean: CDIR := $(D)
 
 $(D)/clean:
-	rm -f $(CDIR)/*~ $(CDIR)/*.o $(CDIR)/runcmd
+	rm -f $(CDIR)/*~ $(CDIR)/*.o $($(CDIR)_EXES)
 
 $(D)/install: CDIR := $(D)
 
 $(D)/install:
-	cp $(CDIR)/runcmd $(BIN_DIR)
-	chmod 755 $(BIN_DIR)/runcmd
+	$(foreach exe,$($(CDIR)_EXES),$(call INSTALL_EXE,$(exe));)
 
 include $(subst .c,.d,$(wildcard $(D)/*.c))
 
