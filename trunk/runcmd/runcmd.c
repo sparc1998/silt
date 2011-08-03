@@ -87,8 +87,9 @@ void usage(FILE* fp){
   fprintf(fp, "  %s,%s              print this help message\n",
 	  HELP_CLA, HELP_SHORT_CLA);
   fprintf(fp, "  %s<cpu list>      restrict execution to the specified "
-	  "command-separated cpu list, cpus are labeled 0 to (n-1)\n",
-	  RESTRICT_CPUS_CLA "=");
+	  "command-separated\n", RESTRICT_CPUS_CLA "=");
+  fprintf(fp, "                         cpu list, cpus are labeled 0 to "
+	  "(n-1)\n");
   fprintf(fp, "  %s<dir>            set execution directory\n",
 	  DIR_CLA "=");
   fprintf(fp, "  %s<file>           set file to store stderr\n",
@@ -103,12 +104,16 @@ void usage(FILE* fp){
 	  OUT_CLA "=");
   fprintf(fp, "  %s<val>        set LD_PRELOAD\n",
 	  PRELOAD_CLA "=");
-  fprintf(fp, "  %s               record resource usage with exit status\n",
-	  RUSAGE_CLA);
+  fprintf(fp, "  %s               record resource usage with exit status; "
+	  "only valid\n", RUSAGE_CLA);
+  fprintf(fp, "                         with the %s option\n",
+	  EXIT_STATUS_FILE_CLA);
   fprintf(fp, "  %s<secs>         sleep time before running command\n",
 	  SLEEP_CLA "=");
-  fprintf(fp, "  %s                 record clock time with exit status\n",
-	  TIME_CLA);
+  fprintf(fp, "  %s                 record clock time with exit status; "
+	  "only valid with\n", TIME_CLA);
+  fprintf(fp, "                         the %s option\n",
+	  EXIT_STATUS_FILE_CLA);
   fprintf(fp, "  %s<secs>       timeout value for command\n",
 	  TIMEOUT_CLA "=");
   fprintf(fp, "  %s              enable verbose output\n",
