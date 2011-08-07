@@ -26,6 +26,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# DESCRIPTION: The point of this script is to configure silt software
+#              to be built. The result of this script is the creation
+#              of system.mk.
+
 ##### enable perl's safety info #####
 use strict;
 use warnings;
@@ -44,12 +48,17 @@ exit(0);
 sub main{
   parsecla();
 
+  # Generate the config.log file that stores the command line that
+  # invoked configure.pl.
   open FH, '> config.log' or die "Unable to open config.log";
   print FH $cmdname;
   foreach my $arg (@ARGV){ print FH ' ' . $arg; }
   print FH "\n";
   close FH;
 
+  # Create the system.mk file which is included by the main makefile.
+  # system.mk contains local system information to the makefile for
+  # use during a silt build.
   open FH, '> system.mk' or die "Unable to open system.mk";
   print FH "PREFIX := " . $prefix . "\n";
   print FH "ARCHIVE_NAME := " . $archivename . "\n";
@@ -64,6 +73,7 @@ sub main{
   `make deps > /dev/null 2>&1`;
 }
 
+# Parse command line arguments
 sub parsecla{
   foreach my $arg (@ARGV){
     if($arg =~ /^-/){
@@ -79,6 +89,7 @@ sub parsecla{
   }
 }
 
+# Print information about how configure.pl can be invoked.
 sub usage{
   print "USAGE: " . $cmdname . " [OPTIONS]
 
@@ -86,9 +97,11 @@ DESCRIPTION: Configure the build environment
 
 OPTIONS:
   -h|--help            print this message
-  --archivename=<str>  define an archive name; the default is silt
+  --archivename=<str>  define an archive name for the make archive target;
+                       the default is silt
   --debug-build        enable a debug build
-  --opt=[0,1,2,3]      set the build optimization level; the default is 2
+  --opt=[0,1,2,3]      set the build optimization level; the optimization
+                       levels correspond to gcc -O values; the default is 2
   --prefix=<dir>       set the installation directory
   --verbose            enable output verbosity
 ";

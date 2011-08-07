@@ -27,24 +27,39 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// DESCRIPTION: Defines useful functions to operate on C strings. No C
+//              files are required to use the contents of this file.
+
 #include "ErrorHandling.h"
 
 #define UINT64_T_MAX_DIGITS 20
 
 /**
  *  This function returns a pointer to the string that immediately
- *  follows prefix in testStr.  If testStr does not begin with prefix,
+ *  follows prefix in teststr.  If teststr does not begin with prefix,
  *  then NULL is returned.
  */
-static inline char* getPtr2StrAfterPrefix(char* testStr, const char* prefix){
-  myassert(testStr && prefix, 0, "testStr or prefix is NULL.");
+static inline char* getPtr2StrAfterPrefix(char* teststr, const char* prefix){
+  myassert(teststr && prefix, 0, "teststr or prefix is NULL.");
   unsigned i;
-  for(i=0; testStr[i] != '\0' && prefix[i] != '\0' && testStr[i] == prefix[i];
+  for(i=0; teststr[i] != '\0' && prefix[i] != '\0' && teststr[i] == prefix[i];
       ++i){}
   if(prefix[i] == '\0'){
-    return &(testStr[i]);
+    return &(teststr[i]);
   }
   return NULL;
+}
+
+/**
+ *  Convert a string to an unsigned 64-bit integer.
+ */
+static inline uint64_t strtou64(char* s){
+  uint64_t v = 0;
+  while(isdigit(*s)){
+    v = v*10 + (*s - '0');
+    ++s;
+  }
+  return v;
 }
 
 #endif // _CSTRINGHELP_H_
