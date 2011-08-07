@@ -1,5 +1,7 @@
-To use SiLT, perform the following commands:
+* To install SiLT, perform the following commands:
 
-./configure.pl --prefix=<install dir>
-make
-make install
+  ./configure --prefix=<install dir>
+  make
+  make install
+
+* './configure --help' will list other configure options.

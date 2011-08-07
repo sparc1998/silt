@@ -26,6 +26,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# DESCRIPTION: This command combines find and grep to perform a
+#              recursive grep in the current directory.
+
 # enable perl's safety info
 use strict;
 use warnings;
@@ -39,7 +42,10 @@ my $verbosity = 0;
 my @files;
 my $grep = "grep -H -n";
 
+# Parse command line arguments
 parsecla();
+
+# Build find command
 my $exclude = "";
 my $dir;
 my $f;
@@ -65,6 +71,8 @@ else{
   }
   $cmd = $cmd . " \\) -print \\)";
 }
+
+# Run find command and store the results to @files
 @files = split /\n/, runcmd($cmd);
 if($verbosity >= 2){
   print "Will search these files ...\n";
@@ -72,17 +80,21 @@ if($verbosity >= 2){
     print "  [" . $f . "]\n";
   }
 }
+
+# Grep the files in @files for $search
 foreach $f (@files){
   system($grep . " " . $search . " " . $f);
 }
 exit(0);
 
+# Perform a command and return the result.
 sub runcmd{
   my $cmd = shift(@_);
   if($verbosity >= 1){ print "CMD: " . $cmd . "\n"; }
   return `$cmd`;
 }
 
+# A function to parse command line arguments.
 sub parsecla{
   my $arg;
   foreach $arg(@ARGV){
@@ -108,9 +120,10 @@ sub parsecla{
   if($search eq ""){ print "No search specified\n"; usage(); exit(1); }
 }
 
+# Print usage information for grep-recursive.
 sub usage{
   print "USAGE: grep-recursive [OPTIONS] <search>
-DESCRIPTION: Recursively grep for <search>.
+DESCRIPTION: Recursively grep for <search> in the current directory.
 OPTIONS:
   --help,-h           print this message
   --accept-ft=<list>  only consider files with the listed extensions

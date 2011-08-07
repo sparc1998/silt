@@ -1,6 +1,3 @@
-#ifndef _RUNCMD_H_
-#define _RUNCMD_H_
-
 // Copyright (c) 2011, Ryan M. Lefever
 // All rights reserved.
 // 
@@ -26,6 +23,12 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#ifndef _RUNCMD_H_
+#define _RUNCMD_H_
+
+// DESCRIPTION: This file defines values for interacting with the RUNCMD
+//              binary.
 
 #define RUNCMD_EXIT_TYPE_PREFIX         "exit_type"
 #define RUNCMD_NORMAL_EXIT              "normal"

@@ -24,6 +24,29 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+/**
+ *  See usage() for a description and usage details of the runcmd
+ *  program.  In the code below, we make use of 2 processes:
+ *
+ *  - parent process: the process started by main that oversees operation
+ *  - app process: the process that execs the app to be run
+ *
+ *  General info:
+ *
+ *  - Child processes inherit signal handlers from the parent.  Of course
+ *    they are destroyed when an exec is performed.
+ *  - Unless specifically disabled, a signal of type s will be blocked if
+ *    we are in a signal handler for a signal of type s.
+ *  - Children inherit their parent's pgid.
+ *  - If we receive signal s, enter s's signal handler, and then raise s
+ *    in the signal handler, we'll enter the signal handler again, as soon
+ *    as the signal handler exits the first time.
+ *  - Forked children do not inherit alarms from their parent.
+ *  - It is ok if we start a pipe for the child to write to the parent,
+ *    and the parent waits before it reads.
+ *  - Children inherit the parent's cpu affinity mask.
+ */
+
 #define _GNU_SOURCE // needed for sched.h and maybe something else
 #include <unistd.h>
 #include <stdlib.h>
@@ -48,29 +71,6 @@
 #include "RunCmd.h"
 #include "RunCmdInternal.h"
 #include "ErrorHandling.h"
-
-/**
- *  See usage() for a description and usage details of the runcmd
- *  program.  In the code below, we make use of 2 processes:
- *
- *  - parent process: the process started by main that oversees operation
- *  - app process: the process that execs the app to be run
- *
- *  General info:
- *
- *  - Child processes inherit signal handlers from the parent.  Of course
- *    they are destroyed when an exec is performed.
- *  - Unless specifically disabled, a signal of type s will be blocked if
- *    we are in a signal handler for a signal of type s.
- *  - Children inherit their parent's pgid.
- *  - If we receive signal s, enter s's signal handler, and then raise s
- *    in the signal handler, we'll enter the signal handler again, as soon
- *    as the signal handler exits the first time.
- *  - Forked children do not inherit alarms from their parent.
- *  - It is ok if we start a pipe for the child to write to the parent,
- *    and the parent waits before it reads.
- *  - Children inherit the parent's cpu affinity mask.
- */
 
 ////////////////////////////
 ///// Global variables /////
@@ -261,8 +261,8 @@ void printState(FILE* fp, char** argv){
 
 /**
  *  This signal handler is designed to handle SIGALRM signals that we
- *  are using for sleeps and timeouts. It also forwards SIGTERM
- *  signals to children.
+ *  use for sleeps and timeouts. It also forwards SIGTERM signals to
+ *  children.
  */
 void sigHandler(int s){
   if( parentPid == 0 || getpid() == parentPid){
@@ -303,6 +303,10 @@ void sigHandler(int s){
   }
 }
 
+/**
+ *  This function install the original signal handler for s and
+ *  reraises s.
+ */
 void installOldSigHandlerAndReraise(int s){
   struct sigaction* newAction = NULL;
   if(s == SIGALRM){ newAction = &origSigAlrmAction; }
@@ -321,7 +325,7 @@ void installOldSigHandlerAndReraise(int s){
 }
 
 /**
- *  Using alarm and pause to create a sleep.
+ *  Uses alarm and pause to create a sleep.
  */
 void mysleep(unsigned secs){
   if(sigHandlerState != NOT_WAITING){
@@ -334,20 +338,8 @@ void mysleep(unsigned secs){
 }
 
 /**
- *  Convert a string to an unsigned 64-bit integer.
- */
-uint64_t strtou64(char* s){
-  uint64_t v = 0;
-  while(isdigit(*s)){
-    v = v*10 + (*s - '0');
-    ++s;
-  }
-  return v;
-}
-
-/**
- *  Read through a comma separated-list of cpu ids and set
- *  affinityMask appropriately.
+ *  Read through a comma separated-list of cpu ids and sets the
+ *  affinityMask global variable appropriately.
  */
 void populateCpuMask(char* cpuList){
   char* current = cpuList;
