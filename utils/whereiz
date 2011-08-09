@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 # Copyright (c) 2011, Ryan M. Lefever
 # All rights reserved.
 #
@@ -24,26 +26,59 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-D := utils
+# DESCRIPTION: Search for binaries in the users path.
 
-$(D)_EXES :=	$(D)/grep-recursive					\
-		$(D)/path						\
-		$(D)/replace						\
-		$(D)/replaceline					\
-		$(D)/whereiz
+# enable perl's safety info
+use strict;
+use warnings;
+use Env;
+Env::import();
 
-$(D)/all:
+# Global variables
+my $search = "";
 
-$(D)/clean: CDIR := $(D)
+main();
+exit(0);
 
-$(D)/clean:
-	rm -f $(CDIR)/*~
+# Parse command line arguments.
+sub parsecla{
+  foreach my $arg (@ARGV){
+    if($arg =~ /^-/){
+      if($arg eq "--help" || $arg eq "-h"){ usage(); exit(0); }
+      else{ print STDERR "Illegal option.\n"; exit(1); }
+    }
+    elsif($search eq ''){ $search = $arg; }
+    else{ print STDERR "Illegal positional argument.\n"; exit(1); }
+  }
+}
 
-$(D)/install: CDIR := $(D)
+# Print usage information.
+sub usage {
+  print "whereiz [OPTIONS] <binary>
+DESCRIPTION: List the locations in the user's path where the binary is
+             located.
+OPTIONS:
+  --help, -h  print this message
+";
+}
 
-$(D)/install:
-	$(foreach exe,$($(CDIR)_EXES),$(call INSTALL_EXE,$(exe));)
+sub main{
+  parsecla();
 
-$(D)/realclean: CDIR := $(D)
+  my $output = "";
+  my @pathdirs = split /:/, (split /\n/, $ENV{PATH})[0];
+  PATHENTRY: foreach my $p (@pathdirs){
+    if(-d $p){
+      my @lsout = split /\n/, `ls "$p"`;
+      foreach my $e (@lsout){
+	if(($p . "/" . $search) eq ($p . "/" . $e)){
+	  $output = $output . " " . $p . "/" . $search;
+	  next PATHENTRY;
+	}
+      }
+    }
+  }
 
-$(D)/realclean: $(D)/clean
+  $output =~ s/^ //;
+  if ($output ne ""){ print $output . "\n"; }
+}
