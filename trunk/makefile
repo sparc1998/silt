@@ -82,7 +82,7 @@ all: $(foreach d,$(SUBDIRS),$(d)/all)
 clean: $(foreach d,$(SUBDIRS),$(d)/clean)
 	rm -f *~
 
-install: installdirs $(foreach d,$(SUBDIRS),$(d)/install)
+install: all installdirs $(foreach d,$(SUBDIRS),$(d)/install)
 
 deps:
 
@@ -103,6 +103,8 @@ findattn:
 	$(GREP_RECURSIVE) --ignore-dir=.svn,./temp --ignore-ft=o,d ATTN
 
 installdirs:
+	mkdir -p $(BIN_DIR)
+	chmod 755 $(BIN_DIR)
 	mkdir -p $(INCLUDE_DIR)
 	chmod 755 $(INCLUDE_DIR)
 
