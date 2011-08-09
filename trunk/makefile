@@ -94,9 +94,8 @@ archive:
 	cp -a `find . -maxdepth 1 -mindepth 1 | grep -v ./temp`		\
 	temp/$(ARCHIVE_NAME)
 	rm -rf `find temp/$(ARCHIVE_NAME) -name .svn`
-	cd temp/$(ARCHIVE_NAME); ./configure.pl; make clean
+	cd temp/$(ARCHIVE_NAME); ./configure.pl; make realclean
 	rm -f temp/$(ARCHIVE_NAME)/system.mk
-	rm -f `find temp/$(ARCHIVE_NAME) -name "*.d"`
 	cd temp; tar cfz $(ARCHIVE_NAME).tgz $(ARCHIVE_NAME)
 
 findattn:
