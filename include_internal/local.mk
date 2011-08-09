@@ -35,3 +35,6 @@ $(D)/clean:
 
 $(D)/install:
 
+$(D)/realclean: CDIR := $(D)
+
+$(D)/realclean: $(D)/clean

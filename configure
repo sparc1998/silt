@@ -48,13 +48,14 @@ exit(0);
 sub main{
   parsecla();
 
-  # Generate the config.log file that stores the command line that
-  # invoked configure.pl.
-  open FH, '> config.log' or die "Unable to open config.log";
+  # Generate the config.status file that stores the command line that
+  # invoked configure.
+  open FH, '> config.status' or die "Unable to open config.status";
   print FH $cmdname;
   foreach my $arg (@ARGV){ print FH ' ' . $arg; }
   print FH "\n";
   close FH;
+  system("chmod u+x config.status");
 
   # Create the system.mk file which is included by the main makefile.
   # system.mk contains local system information to the makefile for
@@ -64,6 +65,10 @@ sub main{
   print FH "ARCHIVE_NAME := " . $archivename . "\n";
   print FH "SYS_CPPFLAGS :=\n";
   print FH "SYS_CFLAGS :=";
+  if($debugBuild){ print FH " -g"; }
+  if($optLevel > 0){ print FH " -O" . $optLevel; }
+  print FH "\n";
+  print FH "SYS_CXXFLAGS :=";
   if($debugBuild){ print FH " -g"; }
   if($optLevel > 0){ print FH " -O" . $optLevel; }
   print FH "\n";

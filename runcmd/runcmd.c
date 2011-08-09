@@ -25,8 +25,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- *  See usage() for a description and usage details of the runcmd
- *  program.  In the code below, we make use of 2 processes:
+ *  @file
+ *
+ *  This program runs another command and allows the specification of
+ *  many useful options.  See usage() for more details
+ *
+ *  In the code below, we make use of 2 processes:
  *
  *  - parent process: the process started by main that oversees operation
  *  - app process: the process that execs the app to be run
@@ -70,7 +74,7 @@
 #include "TimeHelp.h"
 #include "RunCmd.h"
 #include "RunCmdInternal.h"
-#include "ErrorHandling.h"
+#include "CErrorHandling.h"
 
 ////////////////////////////
 ///// Global variables /////
@@ -103,9 +107,7 @@ struct sigaction origSigTermAction;
 ///// Functions /////
 /////////////////////
 
-/**
- *  Print usage information.
- */
+/// Print usage information.
 void usage(FILE* fp){
   fprintf(fp, "USAGE: runcmd [OPTIONS] -- <cmd> [<cmd args>]\n");
   fprintf(fp, "DESCRIPTION: Runs a command under various settings.\n");
@@ -146,9 +148,7 @@ void usage(FILE* fp){
 	  VERBOSE_CLA);
 }
 
-/**
- *  Parses command line arguments.
- */
+/// Parses command line arguments.
 void parseCla(int argc, char** argv){
   unsigned i;
 
@@ -228,9 +228,7 @@ void parseCla(int argc, char** argv){
   myerror("No command specified.");
 }
 
-/**
- *  Print the state of runcmd. This is used for debugging purposes.
- */
+/// Print the state of runcmd. This is used for debugging purposes.
 void printState(FILE* fp, char** argv){
   fprintf(fp, "runcmd state\n");
   fprintf(fp, "  record rusage:     %d\n", recordRusage);
@@ -324,9 +322,7 @@ void installOldSigHandlerAndReraise(int s){
   }
 }
 
-/**
- *  Uses alarm and pause to create a sleep.
- */
+/// Uses alarm and pause to create a sleep.
 void mysleep(unsigned secs){
   if(sigHandlerState != NOT_WAITING){
     myerror("Attempt to schedule a sleep when signal handler is not "
@@ -351,14 +347,12 @@ void populateCpuMask(char* cpuList){
     if(c == '\0'){ stop = 1; }
     else{ *current = '\0'; }
     int cpuNum = strtol(start, NULL, 10);
-    myassert(cpuNum >= 0 && cpuNum < CPU_SETSIZE, 0, "Illegal cpu number.");
+    myassert(cpuNum >= 0 && cpuNum < CPU_SETSIZE, "Illegal cpu number.");
     CPU_SET(cpuNum, &affinityMask);
   }
 }
 
-/**
- *  Main runcmd logic.
- */
+/// Main runcmd logic.
 int main(int argc, char** argv){
   // Parse command line arguments.
   parseCla(argc, argv);
@@ -374,7 +368,7 @@ int main(int argc, char** argv){
   // Set cpu affinity if asked to do so
   if(setCpuAffinity){
     myassert(sched_setaffinity(0, sizeof(cpu_set_t), &affinityMask) == 0,
-	     0, "Unable to set cpu affinity.");
+	     "Unable to set cpu affinity.");
   }
 
   // Register signal handlers
@@ -461,40 +455,40 @@ int main(int argc, char** argv){
 
     // Setup stdin, stdout & stderr redirection
     if(stdinFile){
-      myassert(close(STDIN_FILENO) == 0, 0, "Unable to close child's stdin.");
-      myassert(dup2(appStdinFd, STDIN_FILENO) != -1, 0,
+      myassert(close(STDIN_FILENO) == 0, "Unable to close child's stdin.");
+      myassert(dup2(appStdinFd, STDIN_FILENO) != -1,
 	       "Unable to dup2 stdin in child.");
     }
     if(stdoutFile){
-      myassert(close(STDOUT_FILENO) == 0, 0, "Unable to close child's stdout.");
-      myassert(dup2(appStdoutFd, STDOUT_FILENO) != -1, 0,
+      myassert(close(STDOUT_FILENO) == 0, "Unable to close child's stdout.");
+      myassert(dup2(appStdoutFd, STDOUT_FILENO) != -1,
 	       "Unable to dup2 stdout in child.");
     }
     if(stderrFile){
-      myassert(close(STDERR_FILENO) == 0, 0, "Unable to close child's stderr.");
-      myassert(dup2(appStderrFd, STDERR_FILENO) != -1, 0,
+      myassert(close(STDERR_FILENO) == 0, "Unable to close child's stderr.");
+      myassert(dup2(appStderrFd, STDERR_FILENO) != -1,
 	       "Unable to dup2 stderr in child.");
     }
 
     // Set needed environment variables
     if(preload){
-      myassert(setenv("LD_PRELOAD", preload, 1) == 0, 0,
+      myassert(setenv("LD_PRELOAD", preload, 1) == 0,
 	       "Unable to set LD_PRELOAD.");
     }
     if(ldLibPath){
-      myassert(setenv("LD_LIBRARY_PATH", newLdLibPath, 1) == 0, 0,
+      myassert(setenv("LD_LIBRARY_PATH", newLdLibPath, 1) == 0,
 	       "Unable to set LD_LIBRARY_PATH.");
     }
 
     // Record start time if we are recording clock time
     if(recordClockTime){
       FILE* pipeWriter = fdopen(pipefd[1], "w");
-      myassert(pipeWriter, 0, "Could not open write end of pipe.");
+      myassert(pipeWriter, "Could not open write end of pipe.");
       struct timespec startTime;
-      myassert(clock_gettime(CLOCK_REALTIME, &startTime) == 0, 0,
+      myassert(clock_gettime(CLOCK_REALTIME, &startTime) == 0,
 	       "Could get start time.");
       myassert(fprintf(pipeWriter,
-		       "%lu\n", structTimespec2nsecs(startTime)) >= 0, 0,
+		       "%lu\n", structTimespec2nsecs(startTime)) >= 0,
 	       "Could not write start time to pipe.");
       if(fclose(pipeWriter) != 0){
 	mywarn(0, "Unable to close write end of pipe.");
@@ -509,7 +503,7 @@ int main(int argc, char** argv){
   // Parent process
   
   // Check if fork failed
-  myassert(appForkRv != -1, 0, "Fork failed.");
+  myassert(appForkRv != -1, "Fork failed.");
 
   // Close redirection files so parent does not inadvertently access them
   if(stdinFile && close(appStdinFd) != 0){
@@ -546,10 +540,10 @@ int main(int argc, char** argv){
   uint64_t startTime = 0;
   if(recordClockTime){
     FILE* pipeReader = fdopen(pipefd[0], "r");
-    myassert(pipeReader, 0, "Unable to open read end of pipe.");
+    myassert(pipeReader, "Unable to open read end of pipe.");
     // We add 2 to buf size, one for the '\0' and one for the '\n'
     char buf[UINT64_T_MAX_DIGITS + 2];
-    myassert(fgets(buf, UINT64_T_MAX_DIGITS + 2, pipeReader), 0,
+    myassert(fgets(buf, UINT64_T_MAX_DIGITS + 2, pipeReader),
 	     "Unable to read pipe.");
     startTime = strtou64(buf);
     if(fclose(pipeReader) != 0){
@@ -560,14 +554,14 @@ int main(int argc, char** argv){
   // Record finish time
   struct timespec endTime;
   if(recordClockTime){
-    myassert(clock_gettime(CLOCK_REALTIME, &endTime) == 0, 0,
+    myassert(clock_gettime(CLOCK_REALTIME, &endTime) == 0,
 	     "Unable to record end time.");
   }
 
   // Record exit status
   if(exitStatusFile){
     FILE* exitStatusFp = fopen(exitStatusFile, "w");
-    myassert(exitStatusFp, 0, "Unable to open file to write exit status.");
+    myassert(exitStatusFp, "Unable to open file to write exit status.");
 
     if(appTimedOut){
       // Timeout termination

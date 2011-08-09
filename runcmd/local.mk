@@ -40,9 +40,14 @@ $(D)/install: CDIR := $(D)
 $(D)/install:
 	$(foreach exe,$($(CDIR)_EXES),$(call INSTALL_EXE,$(exe));)
 
+$(D)/realclean: CDIR := $(D)
+
+$(D)/realclean: $(D)/clean
+	rm -f $(CDIR)/*.d $(CDIR)/*.d.*
+
 include $(subst .c,.d,$(wildcard $(D)/*.c))
 
 $(D)/runcmd: LDFLAGS := $(LDFLAGS) -lrt
 
 $(D)/runcmd: $(D)/runcmd.o
-	$(call GEN_EXE,$@,$^)
+	$(call C2EXE,$@,$^)

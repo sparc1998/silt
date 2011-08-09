@@ -1,6 +1,3 @@
-#ifndef _TIMEHELP_H_
-#define _TIMEHELP_H_
-
 // Copyright (c) 2011, Ryan M. Lefever
 // All rights reserved.
 // 
@@ -27,12 +24,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef _TIMEHELP_H_
+#define _TIMEHELP_H_
+
+/**
+ *  @file
+ *
+ *  This file defines common functions to help with time based
+ *  functions. Use of the functions in this file does not require the
+ *  use of an c files.
+ */
+
 #include <stdint.h>
 #include <sys/time.h>
 #include <time.h>
 #include <assert.h>
 #include <string.h>
 
+// Constants
 #define USECS_IN_1_SEC                            1000000
 #define NSECS_IN_1_SEC                            1000000000
 #define MSECS_IN_1_SEC                            1000
@@ -53,6 +62,7 @@ enum TimeUnits{
   SECS
 };
 
+/// Convert time units to a string.
 static inline const char* timeUnits2str(enum TimeUnits tu){
   switch(tu){
   case UNDEFINED_TIME_UNITS: return UNDEFINED_TU_STR; break;
@@ -64,6 +74,7 @@ static inline const char* timeUnits2str(enum TimeUnits tu){
   }
 }
 
+/// Convert a string to time units.
 static inline enum TimeUnits str2timeUnits(const char* s){
   if(strcmp(s, UNDEFINED_TU_STR) == 0){ return UNDEFINED_TIME_UNITS; }
   else if(strcmp(s, "") == 0){          return UNDEFINED_TIME_UNITS; }
@@ -74,6 +85,7 @@ static inline enum TimeUnits str2timeUnits(const char* s){
   else{ myerror("Illegal time units string."); }
 }
 
+/// Converts a time value to msecs.
 static inline double time2msecs(uint64_t value, enum TimeUnits tu,
 				float cpuMhz){
   switch(tu){
@@ -95,16 +107,12 @@ static inline double time2msecs(uint64_t value, enum TimeUnits tu,
   }
 }
 
-/**
- *  Converts a struct timeval to SimpleTime
- */
+/// Converts a struct timeval to usecs.
 static inline uint64_t structTimeval2usecs(struct timeval t){
   return (uint64_t)t.tv_sec * (uint64_t)USECS_IN_1_SEC + (uint64_t)t.tv_usec;
 }
 
-/**
- *  Converts a struct timespec to uint64_t.
- */
+/// Converts a struct timespec to nsecs.
 static inline uint64_t structTimespec2nsecs(struct timespec t){
   return (uint64_t)t.tv_sec * (uint64_t)NSECS_IN_1_SEC + (uint64_t)t.tv_nsec;
 }

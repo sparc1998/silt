@@ -24,25 +24,50 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _RUNCMD_H_
-#define _RUNCMD_H_
+#ifndef _CPPERRORHANDLING_H_
+#define _CPPERRORHANDLING_H_
 
 /**
  *  @file
  *
- *  This file defines values for interacting with the RUNCMD binary.
+ *  This file defines command error handling macros for use with C++
+ *  programs. Use of this file does not require the use of any cpp
+ *  files.
  */
 
-#define RUNCMD_EXIT_TYPE_PREFIX         "exit_type"
-#define RUNCMD_NORMAL_EXIT              "normal"
-#define RUNCMD_SIGNAL_EXIT              "signal"
-#define RUNCMD_TIMEOUT_EXIT             "timeout"
-#define RUNCMD_RV_PREFIX                "rv"
-#define RUNCMD_SIGNAL_TERM_PREFIX       "signal_termination"
-#define RUNCMD_CLOCK_TIME_PREFIX        "clock_time"
-#define RUNCMD_USER_TIME_PREFIX         "user_time"
-#define RUNCMD_SYSTEM_TIME_PREFIX       "system_time"
+#include "CommonErrorHandling.h"
 
-#define RUNCMD_SUCCESS_EXIT_VAL         0
+#include <iostream>
 
-#endif // _RUNCMD_H_
+#include <stdlib.h>
+
+#define debugmsg(printFile, printFun, flush, msg)			\
+  std::cerr << DEBUG_MSG;						\
+  if(printFile){ std::cerr << " " __FILE__ ":" __LINE__; }		\
+  if(printFun){ std::cerr << " " __FUNCTION__; }			\
+  std::cerr << ": " << msg << "\n";					\
+  if(flush){ std::cerr << std::flush; }
+
+#define myerror(msg)							\
+  std::cerr << ERROR_MSG << ": " << msg << "\n";			\
+  abort();
+
+#define mywarn(flush, msg)						\
+  std::cerr << WARN_MSG << ": " << msg << "\n";				\
+  if(flush){ std::cerr << std::flush; }
+
+#define myassert(cond, msg)						\
+  if(!(cond)){								\
+    std::cerr << "Assert failure (" << #cond << "): " << msg << "\n";	\
+    abort();								\
+  }
+
+namespace aux{
+  template<class T1, class T2> T2 checked_ptr_cast(T1 t){
+    T2 nt = dynamic_cast<T2>(t);
+    myassert(nt, "Illegal cast.");
+    return nt;
+  }
+}
+
+#endif // _CPPERRORHANDLING_H_

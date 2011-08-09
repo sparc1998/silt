@@ -37,3 +37,7 @@ $(D)/install: CDIR := $(D)
 
 $(D)/install:
 	$(foreach h,$(wildcard $(CDIR)/*.h),$(call INSTALL_H,$(h));)
+
+$(D)/realclean: CDIR := $(D)
+
+$(D)/realclean: $(D)/clean
