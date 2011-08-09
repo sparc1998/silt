@@ -24,25 +24,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _RUNCMD_H_
-#define _RUNCMD_H_
+#ifndef _COMMONERRORHANDLING_H_
+#define _COMMONERRORHANDLING_H_
 
 /**
  *  @file
  *
- *  This file defines values for interacting with the RUNCMD binary.
+ *  This file defines common error handling strings.
  */
 
-#define RUNCMD_EXIT_TYPE_PREFIX         "exit_type"
-#define RUNCMD_NORMAL_EXIT              "normal"
-#define RUNCMD_SIGNAL_EXIT              "signal"
-#define RUNCMD_TIMEOUT_EXIT             "timeout"
-#define RUNCMD_RV_PREFIX                "rv"
-#define RUNCMD_SIGNAL_TERM_PREFIX       "signal_termination"
-#define RUNCMD_CLOCK_TIME_PREFIX        "clock_time"
-#define RUNCMD_USER_TIME_PREFIX         "user_time"
-#define RUNCMD_SYSTEM_TIME_PREFIX       "system_time"
+#define DEBUG_MSG  "D"
+#define ERROR_MSG  "Error"
+#define WARN_MSG   "Warning"
 
-#define RUNCMD_SUCCESS_EXIT_VAL         0
-
-#endif // _RUNCMD_H_
+#endif // _COMMONERRORHANDLING_H_

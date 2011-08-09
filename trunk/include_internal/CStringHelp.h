@@ -1,6 +1,3 @@
-#ifndef _CSTRINGHELP_H_
-#define _CSTRINGHELP_H_
-
 // Copyright (c) 2011, Ryan M. Lefever
 // All rights reserved.
 // 
@@ -27,12 +24,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// DESCRIPTION: Defines useful functions to operate on C strings. No C
-//              files are required to use the contents of this file.
+#ifndef _CSTRINGHELP_H_
+#define _CSTRINGHELP_H_
 
-#include "ErrorHandling.h"
+/**
+ *  @file
+ *
+ *  This file defines useful functions to compute and manipulate C
+ *  strings. No C files are required to use the contents of this file.
+ */
 
-#define UINT64_T_MAX_DIGITS 20
+#include "CErrorHandling.h"
+#include "CommonStringHelp.h"
 
 /**
  *  This function returns a pointer to the string that immediately
@@ -40,7 +43,7 @@
  *  then NULL is returned.
  */
 static inline char* getPtr2StrAfterPrefix(char* teststr, const char* prefix){
-  myassert(teststr && prefix, 0, "teststr or prefix is NULL.");
+  myassert(teststr && prefix, "teststr or prefix is NULL.");
   unsigned i;
   for(i=0; teststr[i] != '\0' && prefix[i] != '\0' && teststr[i] == prefix[i];
       ++i){}
@@ -50,9 +53,7 @@ static inline char* getPtr2StrAfterPrefix(char* teststr, const char* prefix){
   return NULL;
 }
 
-/**
- *  Convert a string to an unsigned 64-bit integer.
- */
+/// Convert a string to an unsigned 64-bit integer.
 static inline uint64_t strtou64(char* s){
   uint64_t v = 0;
   while(isdigit(*s)){

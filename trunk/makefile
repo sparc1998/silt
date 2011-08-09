@@ -29,11 +29,17 @@ include system.mk
 
 # Paths to tools
 CC := gcc
+CXX := g++
 FIX_DEP_FILES := utils/fix_dfile.pl
+GREP_RECURSIVE := utils/grep-recursive
 
 # Directory paths
-SUBDIRS :=	include			\
+SUBDIRS :=				\
+		getctypeinfo		\
+		include			\
+		include/c++		\
 		include_internal	\
+		include_internal/c++	\
 		runcmd			\
 		utils
 BIN_DIR := $(PREFIX)/bin
@@ -42,6 +48,7 @@ INCLUDE_DIR := $(PREFIX)/include
 # Flags
 CPPFLAGS := $(SYS_CPPFLAGS) -Iinclude -Iinclude_internal
 CFLAGS := $(SYS_CFLAGS) -Wall
+CXXFLAGS := $(SYS_CXXFLAGS) -Wall
 LDFLAGS := $(SYS_LDFLAGS)
 
 # Commands
@@ -56,7 +63,9 @@ CPP2D =		@set -e; rm -f $(1);					\
 		$(FIX_DEP_FILES) $(1).$$$$ $(1) $(2);			\
 		rm -f $(1).$$$$
 C2O =		$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $(1) $(2)
-GEN_EXE =	$(CC) -o $(1) $(2) $(LDFLAGS)
+CPP2O =		$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $(1) $(2)
+C2EXE =		$(CC) -o $(1) $(2) $(LDFLAGS)
+CPP2EXE =	$(CXX) -o $(1) $(2) $(LDFLAGS)
 INSTALL_EXE =	cp $(1) $(BIN_DIR);					\
 		chmod 755 $(BIN_DIR)/$(notdir $(1))
 INSTALL_H =	cp $(1) $(INCLUDE_DIR);					\
@@ -77,6 +86,8 @@ install: installdirs $(foreach d,$(SUBDIRS),$(d)/install)
 
 deps:
 
+realclean: clean $(foreach d,$(SUBDIRS),$(d)/realclean)
+
 archive:
 	rm -rf temp/$(ARCHIVE_NAME) temp/$(ARCHIVE_NAME).tgz
 	mkdir temp/$(ARCHIVE_NAME)
@@ -87,6 +98,9 @@ archive:
 	rm -f temp/$(ARCHIVE_NAME)/system.mk
 	rm -f `find temp/$(ARCHIVE_NAME) -name "*.d"`
 	cd temp; tar cfz $(ARCHIVE_NAME).tgz $(ARCHIVE_NAME)
+
+findattn:
+	$(GREP_RECURSIVE) --ignore-dir=.svn,./temp --ignore-ft=o,d ATTN
 
 installdirs:
 	mkdir -p $(INCLUDE_DIR)
@@ -100,3 +114,6 @@ installdirs:
 
 %.o: %.c
 	$(call C2O,$@,$<)
+
+%.o: %.cpp
+	$(call CPP2O,$@,$<)

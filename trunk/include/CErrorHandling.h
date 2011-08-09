@@ -24,17 +24,19 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _ERRORHANDLING_H_
-#define _ERRORHANDLING_H_
+#ifndef _CERRORHANDLING_H_
+#define _CERRORHANDLING_H_
 
-// DESCRIPTION: Define common error handling macros. No C files are
-//              required to use the contents of this file.
+/**
+ *  @file
+ *
+ *  This file defines common error handling macros for C programs. No
+ *  C files are required to use the contents of this file.
+ */
+
+#include "CommonErrorHandling.h"
 
 #include <stdio.h>
-
-#define DEBUG_MSG  "D"
-#define ERROR_MSG  "Error"
-#define WARN_MSG   "Warning"
 
 #define debugmsg(printFile, printFun, flush, msg, ...)			\
   fprintf(stderr, DEBUG_MSG);						\
@@ -57,14 +59,12 @@
   fprintf(stderr, "\n");						\
   if(flush){ fflush(stderr); }
 
-#define myassert(cond, printFile, msg, ...)				\
+#define myassert(cond, msg, ...)					\
   if(!(cond)){								\
-    fprintf(stderr, "Assert failure (%s)", #cond);			\
-    if(printFile){ fprintf(stderr, " %s:%d", __FILE__, __LINE__); }	\
-    fprintf(stderr, ": ");						\
+    fprintf(stderr, "Assert failure (%s): ", #cond);			\
     fprintf(stderr, msg, ## __VA_ARGS__);				\
     fprintf(stderr, "\n");						\
     abort();								\
   }
 
-#endif // _ERRORHANDLING_H_
+#endif // _CERRORHANDLING_H_

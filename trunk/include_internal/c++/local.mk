@@ -24,11 +24,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-D := utils
-
-$(D)_EXES :=	$(D)/grep-recursive					\
-		$(D)/path						\
-		$(D)/replace
+D := include_internal/c++
 
 $(D)/all:
 
@@ -37,10 +33,7 @@ $(D)/clean: CDIR := $(D)
 $(D)/clean:
 	rm -f $(CDIR)/*~
 
-$(D)/install: CDIR := $(D)
-
 $(D)/install:
-	$(foreach exe,$($(CDIR)_EXES),$(call INSTALL_EXE,$(exe));)
 
 $(D)/realclean: CDIR := $(D)
 

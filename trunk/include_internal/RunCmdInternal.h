@@ -1,6 +1,3 @@
-#ifndef _RUNCMDINTERNAL_H_
-#define _RUNCMDINTERNAL_H_
-
 // Copyright (c) 2011, Ryan M. Lefever
 // All rights reserved.
 // 
@@ -26,6 +23,15 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#ifndef _RUNCMDINTERNAL_H_
+#define _RUNCMDINTERNAL_H_
+
+/**
+ *  @file
+ *
+ *  This file defines information for use with the runcmd program.
+ */
 
 #include <stdint.h>
 

@@ -24,18 +24,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-D := utils
+D := getctypeinfo
 
-$(D)_EXES :=	$(D)/grep-recursive					\
-		$(D)/path						\
-		$(D)/replace
+$(D)_EXES := $(D)/getctypeinfo
 
-$(D)/all:
+$(D)/all: $($(D)_EXES)
 
 $(D)/clean: CDIR := $(D)
 
 $(D)/clean:
-	rm -f $(CDIR)/*~
+	rm -f $(CDIR)/*~ $(CDIR)/*.o $($(CDIR)_EXES)
 
 $(D)/install: CDIR := $(D)
 
@@ -45,3 +43,9 @@ $(D)/install:
 $(D)/realclean: CDIR := $(D)
 
 $(D)/realclean: $(D)/clean
+	rm -f $(CDIR)/*.d $(CDIR)/*.d.*
+
+include $(subst .cpp,.d,$(wildcard $(D)/*.cpp))
+
+$(D)/getctypeinfo: $(D)/getctypeinfo.o
+	$(call CPP2EXE,$@,$^)
