@@ -24,17 +24,48 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _COMMONERRORHANDLING_H_
-#define _COMMONERRORHANDLING_H_
+#ifndef _SILTCERROR_H_
+#define _SILTCERROR_H_
 
 /**
  *  @file
  *
- *  This file defines common error handling strings.
+ *  This file defines common error handling macros for C programs. No
+ *  C files are required to use the contents of this file.
  */
 
-#define DEBUG_MSG  "D"
-#define ERROR_MSG  "Error"
-#define WARN_MSG   "Warning"
+#include "SiltCommonError.h"
 
-#endif // _COMMONERRORHANDLING_H_
+#include <stdio.h>
+#include <stdlib.h>
+
+#define debugmsg(printFile, printFun, flush, msg, ...)			\
+  fprintf(stderr, DEBUG_MSG);						\
+  if(printFile){ fprintf(stderr, " " __FILE__ ":%d", __LINE__); }	\
+  if(printFun){ fprintf(stderr, " %s",  __FUNCTION__); }		\
+  fprintf(stderr, ": ");						\
+  fprintf(stderr, msg, ## __VA_ARGS__);					\
+  fprintf(stderr, "\n");						\
+  if(flush){ fflush(stderr); }
+
+#define myerror(msg, ...)						\
+  fprintf(stderr, ERROR_MSG ": ");					\
+  fprintf(stderr, msg, ## __VA_ARGS__);					\
+  fprintf(stderr, "\n");						\
+  abort();
+
+#define mywarn(flush, msg, ...)						\
+  fprintf(stderr, WARN_MSG ": ");					\
+  fprintf(stderr, msg, ## __VA_ARGS__);					\
+  fprintf(stderr, "\n");						\
+  if(flush){ fflush(stderr); }
+
+#define myassert(cond, msg, ...)					\
+  if(!(cond)){								\
+    fprintf(stderr, "Assert failure (%s): ", #cond);			\
+    fprintf(stderr, msg, ## __VA_ARGS__);				\
+    fprintf(stderr, "\n");						\
+    abort();								\
+  }
+
+#endif // _SILTCERROR_H_

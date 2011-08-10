@@ -24,50 +24,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _CPPERRORHANDLING_H_
-#define _CPPERRORHANDLING_H_
+#ifndef _SILTCOMMONERROR_H_
+#define _SILTCOMMONERROR_H_
 
 /**
  *  @file
  *
- *  This file defines command error handling macros for use with C++
- *  programs. Use of this file does not require the use of any cpp
- *  files.
+ *  This file defines common error handling strings.
  */
 
-#include "CommonErrorHandling.h"
+#define DEBUG_MSG  "D"
+#define ERROR_MSG  "Error"
+#define WARN_MSG   "Warning"
 
-#include <iostream>
-
-#include <stdlib.h>
-
-#define debugmsg(printFile, printFun, flush, msg)			\
-  std::cerr << DEBUG_MSG;						\
-  if(printFile){ std::cerr << " " __FILE__ ":" __LINE__; }		\
-  if(printFun){ std::cerr << " " __FUNCTION__; }			\
-  std::cerr << ": " << msg << "\n";					\
-  if(flush){ std::cerr << std::flush; }
-
-#define myerror(msg)							\
-  std::cerr << ERROR_MSG << ": " << msg << "\n";			\
-  abort();
-
-#define mywarn(flush, msg)						\
-  std::cerr << WARN_MSG << ": " << msg << "\n";				\
-  if(flush){ std::cerr << std::flush; }
-
-#define myassert(cond, msg)						\
-  if(!(cond)){								\
-    std::cerr << "Assert failure (" << #cond << "): " << msg << "\n";	\
-    abort();								\
-  }
-
-namespace silt{
-  template<class T1, class T2> T2 checked_ptr_cast(T1 t){
-    T2 nt = dynamic_cast<T2>(t);
-    myassert(nt, "Illegal cast.");
-    return nt;
-  }
-}
-
-#endif // _CPPERRORHANDLING_H_
+#endif // _SILTCOMMONERROR_H_

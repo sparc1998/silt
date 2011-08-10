@@ -33,7 +33,7 @@
  *  This file provides help generating and manipulating c++ strings.
  */
 
-#include "c++/CppErrorHandling.h"
+#include "c++/SiltCppError.h"
 #include "CommonStringHelp.h"
 
 #include <string>

@@ -34,6 +34,8 @@
  */
 
 #include <stdint.h>
+#include <signal.h>
+#include <sched.h>
 
 // Contants
 #define HELP_SHORT_CLA           "-h"

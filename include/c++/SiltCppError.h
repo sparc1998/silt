@@ -24,47 +24,50 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _CERRORHANDLING_H_
-#define _CERRORHANDLING_H_
+#ifndef _SILTCPPERROR_H_
+#define _SILTCPPERROR_H_
 
 /**
  *  @file
  *
- *  This file defines common error handling macros for C programs. No
- *  C files are required to use the contents of this file.
+ *  This file defines command error handling macros for use with C++
+ *  programs. Use of this file does not require the use of any cpp
+ *  files.
  */
 
-#include "CommonErrorHandling.h"
+#include "SiltCommonError.h"
 
-#include <stdio.h>
+#include <iostream>
 
-#define debugmsg(printFile, printFun, flush, msg, ...)			\
-  fprintf(stderr, DEBUG_MSG);						\
-  if(printFile){ fprintf(stderr, " " __FILE__ ":%d", __LINE__); }	\
-  if(printFun){ fprintf(stderr, " %s",  __FUNCTION__); }		\
-  fprintf(stderr, ": ");						\
-  fprintf(stderr, msg, ## __VA_ARGS__);					\
-  fprintf(stderr, "\n");						\
-  if(flush){ fflush(stderr); }
+#include <stdlib.h>
 
-#define myerror(msg, ...)						\
-  fprintf(stderr, ERROR_MSG ": ");					\
-  fprintf(stderr, msg, ## __VA_ARGS__);					\
-  fprintf(stderr, "\n");						\
+#define debugmsg(printFile, printFun, flush, msg)			\
+  std::cerr << DEBUG_MSG;						\
+  if(printFile){ std::cerr << " " __FILE__ ":" __LINE__; }		\
+  if(printFun){ std::cerr << " " __FUNCTION__; }			\
+  std::cerr << ": " << msg << "\n";					\
+  if(flush){ std::cerr << std::flush; }
+
+#define myerror(msg)							\
+  std::cerr << ERROR_MSG << ": " << msg << "\n";			\
   abort();
 
-#define mywarn(flush, msg, ...)						\
-  fprintf(stderr, WARN_MSG ": ");					\
-  fprintf(stderr, msg, ## __VA_ARGS__);					\
-  fprintf(stderr, "\n");						\
-  if(flush){ fflush(stderr); }
+#define mywarn(flush, msg)						\
+  std::cerr << WARN_MSG << ": " << msg << "\n";				\
+  if(flush){ std::cerr << std::flush; }
 
-#define myassert(cond, msg, ...)					\
+#define myassert(cond, msg)						\
   if(!(cond)){								\
-    fprintf(stderr, "Assert failure (%s): ", #cond);			\
-    fprintf(stderr, msg, ## __VA_ARGS__);				\
-    fprintf(stderr, "\n");						\
+    std::cerr << "Assert failure (" << #cond << "): " << msg << "\n";	\
     abort();								\
   }
 
-#endif // _CERRORHANDLING_H_
+namespace silt{
+  template<class T1, class T2> T2 checked_ptr_cast(T1 t){
+    T2 nt = dynamic_cast<T2>(t);
+    myassert(nt, "Illegal cast.");
+    return nt;
+  }
+}
+
+#endif // _SILTCPPERROR_H_

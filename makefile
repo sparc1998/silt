@@ -28,25 +28,27 @@
 include system.mk
 
 # Paths to tools
-CC := gcc
-CXX := g++
-FIX_DEP_FILES := utils/fix_dfile.pl
-GREP_RECURSIVE := utils/grep-recursive
+CC :=			gcc
+CXX :=			g++
+FIX_DEP_FILES :=	utils/fix_dfile.pl
+GREP_RECURSIVE :=	utils/grep-recursive
+REPLACELINE :=		utils/replaceline
 
 # Directory paths
-SUBDIRS :=				\
-		getctypeinfo		\
-		include			\
-		include/c++		\
-		include_internal	\
-		include_internal/c++	\
-		runcmd			\
-		utils
+SUBDIRS :=					\
+			getctypeinfo		\
+			include			\
+			include/c++		\
+			include_internal	\
+			include_internal/c++	\
+			runcmd			\
+			utils
 BIN_DIR := $(PREFIX)/bin
 INCLUDE_DIR := $(PREFIX)/include
 
 # Flags
-CPPFLAGS := $(SYS_CPPFLAGS) -Iinclude -Iinclude_internal
+# _GNU_SOURCE is required for cpu affinity stuff
+CPPFLAGS := $(SYS_CPPFLAGS) -Iinclude -Iinclude_internal -D_GNU_SOURCE
 CFLAGS := $(SYS_CFLAGS) -Wall
 CXXFLAGS := $(SYS_CXXFLAGS) -Wall
 LDFLAGS := $(SYS_LDFLAGS)
