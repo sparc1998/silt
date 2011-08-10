@@ -41,7 +41,7 @@
 #include <iostream>
 #include <math.h>
 
-namespace aux{
+namespace silt{
   /// Converts a bool to a string of "1" or "0".
   static inline std::string zeroOrOne(bool expr){ return (expr ? "1" : "0"); }
 

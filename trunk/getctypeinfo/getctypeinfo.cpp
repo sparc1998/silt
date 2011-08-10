@@ -84,19 +84,19 @@ template <class Type> void printIntegralType(std::string typeName,
   if(size < COL_1_LEN){ std::cout << std::string(COL_1_LEN - size, ' '); }
   std::cout << " ";
  
-  std::string str = aux::int2str<size_t>(sizeof(Type)*8);
+  std::string str = silt::int2str<size_t>(sizeof(Type)*8);
   size = str.size();
   if(size < COL_2_LEN){ std::cout << std::string(COL_2_LEN - size, ' '); }
   std::cout << str << " ";
 
-  str = aux::int2str<Type>(isSigned ? getSignedIntegralTypeMin<Type>() :
-			   getUnsignedIntegralTypeMin<Type>());
+  str = silt::int2str<Type>(isSigned ? getSignedIntegralTypeMin<Type>() :
+			    getUnsignedIntegralTypeMin<Type>());
   size = str.size();
   if(size < COL_3_LEN){ std::cout << std::string(COL_3_LEN - size, ' '); }
   std::cout << str << " ";
 
-  str = aux::int2str<Type>(isSigned ? getSignedIntegralTypeMax<Type>() :
-			   getUnsignedIntegralTypeMax<Type>());
+  str = silt::int2str<Type>(isSigned ? getSignedIntegralTypeMax<Type>() :
+			    getUnsignedIntegralTypeMax<Type>());
   size = str.size();
   if(size < COL_4_LEN){ std::cout << std::string(COL_4_LEN - size, ' '); }
   std::cout << str << "\n";
@@ -110,19 +110,19 @@ void printCharType(std::string typeName, bool isSigned){
   if(size < COL_1_LEN){ std::cout << std::string(COL_1_LEN - size, ' '); }
   std::cout << " ";
 
-  std::string str = aux::int2str<size_t>(sizeof(char)*8);
+  std::string str = silt::int2str<size_t>(sizeof(char)*8);
   size = str.size();
   if(size < COL_2_LEN){ std::cout << std::string(COL_2_LEN - size, ' '); }
   std::cout << str << " ";
 
-  str = aux::int2str<int>
+  str = silt::int2str<int>
     (isSigned ? (int)getSignedIntegralTypeMin<char>() :
      (int)getUnsignedIntegralTypeMin<unsigned char>());
   size = str.size();
   if(size < COL_3_LEN){ std::cout << std::string(COL_3_LEN - size, ' '); }
   std::cout << str << " ";
 
-  str = aux::int2str<int>
+  str = silt::int2str<int>
     (isSigned ? (int)getSignedIntegralTypeMax<char>() :
      (int)getUnsignedIntegralTypeMax<unsigned char>());
   size = str.size();
@@ -140,7 +140,7 @@ void printVoidPtrType(){
   if(size < COL_1_LEN){ std::cout << std::string(COL_1_LEN - size, ' '); }
   std::cout << " ";
 
-  std::string str = aux::int2str<size_t>(sizeof(void*)*8);
+  std::string str = silt::int2str<size_t>(sizeof(void*)*8);
   size = str.size();
   if(size < COL_2_LEN){ std::cout << std::string(COL_2_LEN - size, ' '); }
   std::cout << str << " ";
@@ -167,17 +167,17 @@ template <class Type> void printFloatingPointType(std::string typeName,
   if(size < COL_1_LEN){ std::cout << std::string(COL_1_LEN - size, ' '); }
   std::cout << " ";
 
-  str = aux::int2str<size_t>(sizeof(Type)*8);
+  str = silt::int2str<size_t>(sizeof(Type)*8);
   size = str.size();
   if(size < COL_2_LEN){ std::cout << std::string(COL_2_LEN - size, ' '); }
   std::cout << str << " ";
 
-  str = aux::fp2str<Type>(min);
+  str = silt::fp2str<Type>(min);
   size = str.size();
   if(size < COL_3_LEN){ std::cout << std::string(COL_3_LEN - size, ' '); }
   std::cout << str << " ";
 
-  str = aux::fp2str<Type>(max);
+  str = silt::fp2str<Type>(max);
   size = str.size();
   if(size < COL_4_LEN){ std::cout << std::string(COL_4_LEN - size, ' '); }
   std::cout << str << "\n";

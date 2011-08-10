@@ -62,7 +62,7 @@
     abort();								\
   }
 
-namespace aux{
+namespace silt{
   template<class T1, class T2> T2 checked_ptr_cast(T1 t){
     T2 nt = dynamic_cast<T2>(t);
     myassert(nt, "Illegal cast.");
