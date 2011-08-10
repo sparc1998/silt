@@ -88,15 +88,15 @@ deps:
 
 realclean: clean $(foreach d,$(SUBDIRS),$(d)/realclean)
 
-archive:
-	rm -rf temp/$(ARCHIVE_NAME) temp/$(ARCHIVE_NAME).tgz
-	mkdir temp/$(ARCHIVE_NAME)
+dist:
+	rm -rf temp/$(DIST_NAME) temp/$(DIST_NAME).tgz
+	mkdir temp/$(DIST_NAME)
 	cp -a `find . -maxdepth 1 -mindepth 1 | grep -v ./temp`		\
-	temp/$(ARCHIVE_NAME)
-	rm -rf `find temp/$(ARCHIVE_NAME) -name .svn`
-	cd temp/$(ARCHIVE_NAME); ./configure.pl; make realclean
-	rm -f temp/$(ARCHIVE_NAME)/system.mk
-	cd temp; tar cfz $(ARCHIVE_NAME).tgz $(ARCHIVE_NAME)
+	temp/$(DIST_NAME)
+	rm -rf `find temp/$(DIST_NAME) -name .svn`
+	cd temp/$(DIST_NAME); ./configure.pl; make realclean
+	rm -f temp/$(DIST_NAME)/system.mk
+	cd temp; tar cfz $(DIST_NAME).tgz $(DIST_NAME)
 
 findattn:
 	$(GREP_RECURSIVE) --ignore-dir=.svn,./temp --ignore-ft=o,d ATTN

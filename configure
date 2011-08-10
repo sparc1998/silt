@@ -40,7 +40,7 @@ my $verbose = 0;
 my $prefix = "/dev/null";
 my $debugBuild = 0;
 my $optLevel = 2;
-my $archivename = "silt";
+my $distname = "silt";
 
 main();
 exit(0);
@@ -62,7 +62,7 @@ sub main{
   # use during a silt build.
   open FH, '> system.mk' or die "Unable to open system.mk";
   print FH "PREFIX := " . $prefix . "\n";
-  print FH "ARCHIVE_NAME := " . $archivename . "\n";
+  print FH "DIST_NAME := " . $distname . "\n";
   print FH "SYS_CPPFLAGS :=\n";
   print FH "SYS_CFLAGS :=";
   if($debugBuild){ print FH " -g"; }
@@ -83,7 +83,7 @@ sub parsecla{
   foreach my $arg (@ARGV){
     if($arg =~ /^-/){
       if($arg eq "-h" || $arg eq "--help"){ usage(); exit(0); }
-      elsif($arg =~ /^--archivename=(.+)/){ $archivename = $1; }
+      elsif($arg =~ /^--distname=(.+)/){ $distname = $1; }
       elsif($arg eq "--debug-build"){ $debugBuild = 1; }
       elsif($arg =~ /^--opt=(0|1|2|3)$/){ $optLevel = $1; }
       elsif($arg =~ /^--prefix=(.+)/){ $prefix = $1; }
@@ -102,7 +102,7 @@ DESCRIPTION: Configure the build environment
 
 OPTIONS:
   -h|--help            print this message
-  --archivename=<str>  define an archive name for the make archive target;
+  --distname=<str>     define a distribution name for the make dist target;
                        the default is silt
   --debug-build        enable a debug build
   --opt=[0,1,2,3]      set the build optimization level; the optimization
