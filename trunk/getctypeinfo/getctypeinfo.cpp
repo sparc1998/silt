@@ -31,11 +31,7 @@
  *  used C scalar types.
  */
 
-#define COL_1_LEN  20
-#define COL_2_LEN  4
-#define COL_3_LEN  20
-#define COL_4_LEN  20
-
+#include "CommonStringHelp.h"
 #include "c++/CppStringHelp.h"
 
 #include <iostream>
@@ -47,6 +43,11 @@
 #include <stddef.h>
 #include <limits.h>
 #include <sys/types.h>
+
+#define COL_1_LEN  20
+#define COL_2_LEN  4
+#define COL_3_LEN  UINT64_T_MAX_DIGITS
+#define COL_4_LEN  UINT64_T_MAX_DIGITS
 
 /// Get the max value for the signed integral type.
 template <class Type> Type getSignedIntegralTypeMax(){

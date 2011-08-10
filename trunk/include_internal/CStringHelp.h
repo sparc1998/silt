@@ -34,8 +34,11 @@
  *  strings. No C files are required to use the contents of this file.
  */
 
-#include "CErrorHandling.h"
+#include "SiltCError.h"
 #include "CommonStringHelp.h"
+
+#include <stdint.h>
+#include <ctype.h>
 
 /**
  *  This function returns a pointer to the string that immediately

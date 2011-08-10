@@ -51,7 +51,12 @@
  *  - Children inherit the parent's cpu affinity mask.
  */
 
-#define _GNU_SOURCE // needed for sched.h and maybe something else
+#include "CStringHelp.h"
+#include "TimeHelp.h"
+#include "RunCmd.h"
+#include "RunCmdInternal.h"
+#include "SiltCError.h"
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -69,12 +74,6 @@
 #include <signal.h>
 #include <ctype.h>
 #include <sched.h>
-
-#include "CStringHelp.h"
-#include "TimeHelp.h"
-#include "RunCmd.h"
-#include "RunCmdInternal.h"
-#include "CErrorHandling.h"
 
 ////////////////////////////
 ///// Global variables /////
