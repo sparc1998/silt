@@ -48,6 +48,8 @@ for($i=0; $i<=$#paths; $i++){
 sub usage{
   print "USAGE: path [OPTIONS]
 DESCRIPTION: Print each directory in the PATH variable to a different line.
+             This program is part of the SiLT project:
+             http://code.google.com/p/silt
 OPTIONS:
   --help,-h           print this message
 ";

@@ -124,6 +124,8 @@ sub parsecla{
 sub usage{
   print "USAGE: grep-recursive [OPTIONS] <search>
 DESCRIPTION: Recursively grep for <search> in the current directory.
+             This program is part of the SiLT project:
+             http://code.google.com/p/silt
 OPTIONS:
   --help,-h           print this message
   --accept-ft=<list>  only consider files with the listed extensions

@@ -110,6 +110,8 @@ struct sigaction origSigTermAction;
 void usage(FILE* fp){
   fprintf(fp, "USAGE: runcmd [OPTIONS] -- <cmd> [<cmd args>]\n");
   fprintf(fp, "DESCRIPTION: Runs a command under various settings.\n");
+  fprintf(fp, "             This program is part of the SiLT project:\n");
+  fprintf(fp, "             http://code.google.com/p/silt\n");
   fprintf(fp, "OPTIONS:\n");
   fprintf(fp, "  %s,%s              print this help message\n",
 	  HELP_CLA, HELP_SHORT_CLA);
