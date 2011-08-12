@@ -38,7 +38,6 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <time.h>
-#include <assert.h>
 #include <string.h>
 
 // Constants

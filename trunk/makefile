@@ -28,8 +28,7 @@
 include system.mk
 
 # Paths to tools
-CC :=			gcc
-CXX :=			g++
+AR :=			ar
 INSTALL :=		install
 DOXYGEN :=		doxygen
 FIX_DEP_FILES :=	utils/fix_dfile.pl
