@@ -104,7 +104,7 @@ sub main{
     print "checking for " . $bin . " ... ";
     my $foundBin = checkForBin($bin);
     if($foundBin ne ''){ print $foundBin . "\n";}
-    else{ print "not found\n"; $missingBins = 1; }
+    else{ print "no\n"; $missingBins = 1; }
   }
   if($missingBins){ print "Error missing binaries.\n"; }
 
@@ -112,8 +112,8 @@ sub main{
   my $missingLibs = 0;
   foreach my $lib (@requiredLibs){
     print "checking for " . $lib . " ... ";
-    if(checkForLib($lib)){ print "found\n";}
-    else{ print "not found\n"; $missingLibs = 1; }
+    if(checkForLib($lib)){ print "yes\n";}
+    else{ print "no\n"; $missingLibs = 1; }
   }
   if($missingLibs){ print "Error missing libraries.\n"; }
 
@@ -121,8 +121,8 @@ sub main{
   my $missingHFiles = 0;
   foreach my $hfile (@requiredHFiles){
     print "checking for " . $hfile . " ... ";
-    if(checkForHFile($hfile)){ print "found\n";}
-    else{ print "not found\n"; $missingHFiles = 1; }
+    if(checkForHFile($hfile)){ print "yes\n";}
+    else{ print "no\n"; $missingHFiles = 1; }
   }
   if($missingHFiles){ print "Error missing h files.\n"; }
 
