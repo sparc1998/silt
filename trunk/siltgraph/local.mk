@@ -24,9 +24,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-D := runcmd
+D := siltgraph
 
-$(D)_TARGET := $(D)/runcmd
+$(D)_TARGET := $(D)/libsiltgraph.a
 
 $(D)/all: $($(D)_TARGET)
 
@@ -35,18 +35,13 @@ $(D)/clean: CDIR := $(D)
 $(D)/clean:
 	rm -f $(CDIR)/*~ $(CDIR)/*.o $($(CDIR)_TARGET)
 
-$(D)/install: $($(D)_TARGET).bininstall
+$(D)/install: $($(D)_TARGET).ainstall
 
 $(D)/realclean: CDIR := $(D)
 
 $(D)/realclean: $(D)/clean
 	rm -f $(CDIR)/*.d $(CDIR)/*.d.*
 
-include $(subst .c,.d,$(wildcard $(D)/*.c))
+include $(subst .cpp,.d,$(wildcard $(D)/*.cpp))
 
-$($(D)_TARGET): LDFLAGS := $(LDFLAGS) -lrt
-
-$($(D)_TARGET): CPPFLAGS := $(CPPFLAGS) -D_GNU_SOURCE
-
-$($(D)_TARGET): $(D)/runcmd.o
-	$(call C2EXE,$@,$^)
+$($(D)_TARGET): $(D)/SiltGraph.o
