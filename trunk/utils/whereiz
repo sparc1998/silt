@@ -57,6 +57,8 @@ sub usage {
   print "whereiz [OPTIONS] <binary>
 DESCRIPTION: List the locations in the user's path where the binary is
              located.
+             This program is part of the SiLT project:
+             http://code.google.com/p/silt
 OPTIONS:
   --help, -h  print this message
 ";

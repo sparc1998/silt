@@ -129,7 +129,12 @@ sub main{
 
 # Prints usage information
 sub usage{
-  print "replace --help |\n";
-  print "replace -h |\n";
-  print "replace from to [from to] ... -- file [file] ...\n";
+  print "USAGE: replace [OPTIONS] <from str> <to str> [<from str> <to str>] ...
+               -- <file> [<file>] ...
+DESCRIPTION: Replace from strings with to strings in the specified files.
+             This program is part of the SiLT project:
+             http://code.google.com/p/silt
+OPTIONS:
+  --help,-h  print this message
+";
 }
