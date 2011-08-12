@@ -26,7 +26,7 @@
 
 D := utils
 
-$(D)_EXES :=	$(D)/grep-recursive					\
+$(D)_TARGETS :=	$(D)/grep-recursive					\
 		$(D)/path						\
 		$(D)/replace						\
 		$(D)/replaceline					\
@@ -39,10 +39,7 @@ $(D)/clean: CDIR := $(D)
 $(D)/clean:
 	rm -f $(CDIR)/*~
 
-$(D)/install: CDIR := $(D)
-
-$(D)/install:
-	$(foreach exe,$($(CDIR)_EXES),$(call INSTALL_EXE,$(exe));)
+$(D)/install: $(foreach t,$($(D)_TARGETS),$(t).bininstall)
 
 $(D)/realclean: CDIR := $(D)
 

@@ -26,19 +26,16 @@
 
 D := getctypeinfo
 
-$(D)_EXES := $(D)/getctypeinfo
+$(D)_TARGET := $(D)/getctypeinfo
 
-$(D)/all: $($(D)_EXES)
+$(D)/all: $($(D)_TARGET)
 
 $(D)/clean: CDIR := $(D)
 
 $(D)/clean:
-	rm -f $(CDIR)/*~ $(CDIR)/*.o $($(CDIR)_EXES)
+	rm -f $(CDIR)/*~ $(CDIR)/*.o $($(CDIR)_TARGET)
 
-$(D)/install: CDIR := $(D)
-
-$(D)/install:
-	$(foreach exe,$($(CDIR)_EXES),$(call INSTALL_EXE,$(exe));)
+$(D)/install: $($(D)_TARGET).bininstall
 
 $(D)/realclean: CDIR := $(D)
 
@@ -47,5 +44,5 @@ $(D)/realclean: $(D)/clean
 
 include $(subst .cpp,.d,$(wildcard $(D)/*.cpp))
 
-$(D)/getctypeinfo: $(D)/getctypeinfo.o
+$($(D)_TARGET): $(D)/getctypeinfo.o
 	$(call CPP2EXE,$@,$^)

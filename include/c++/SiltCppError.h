@@ -41,20 +41,20 @@
 
 #include <stdlib.h>
 
-#define debugmsg(printFile, printFun, flush, msg)			\
+#define debugmsg(printFile, printFun, flushOutput, msg)			\
   std::cerr << DEBUG_MSG;						\
-  if(printFile){ std::cerr << " " __FILE__ ":" __LINE__; }		\
-  if(printFun){ std::cerr << " " __FUNCTION__; }			\
+  if(printFile){ std::cerr << " " << __FILE__ << ":" << __LINE__; }	\
+  if(printFun){ std::cerr << " " << __FUNCTION__; }			\
   std::cerr << ": " << msg << "\n";					\
-  if(flush){ std::cerr << std::flush; }
+  if(flushOutput){ std::cerr << std::flush; }
 
 #define myerror(msg)							\
   std::cerr << ERROR_MSG << ": " << msg << "\n";			\
   abort();
 
-#define mywarn(flush, msg)						\
-  std::cerr << WARN_MSG << ": " << msg << "\n";				\
-  if(flush){ std::cerr << std::flush; }
+#define mywarn(flushAfterMsg, msg)	      			        \
+  std::cerr << WARN_MSG << ": " << msg << "\n";			        \
+  if(flushAfterMsg){ std::cerr << std::flush; }
 
 #define myassert(cond, msg)						\
   if(!(cond)){								\

@@ -30,25 +30,30 @@ include system.mk
 # Paths to tools
 CC :=			gcc
 CXX :=			g++
+INSTALL :=		install
+DOXYGEN :=		doxygen
 FIX_DEP_FILES :=	utils/fix_dfile.pl
 GREP_RECURSIVE :=	utils/grep-recursive
 REPLACELINE :=		utils/replaceline
 
 # Directory paths
-SUBDIRS :=					\
-			getctypeinfo		\
-			include			\
-			include/c++		\
-			include_internal	\
-			include_internal/c++	\
-			runcmd			\
+SUBDIRS :=						\
+			getctypeinfo			\
+			include				\
+			include/c++			\
+			include_internal		\
+			include_internal/c++		\
+			runcmd				\
+			siltgraph			\
 			utils
+TEST_SUBDIRS :=		test/siltgraph/linegraph-000
 BIN_DIR := $(PREFIX)/bin
 INCLUDE_DIR := $(PREFIX)/include
+LIB_DIR := $(PREFIX)/lib
 
 # Flags
 # _GNU_SOURCE is required for cpu affinity stuff
-CPPFLAGS := $(SYS_CPPFLAGS) -Iinclude -Iinclude_internal -D_GNU_SOURCE
+CPPFLAGS := $(SYS_CPPFLAGS) -Iinclude -Iinclude_internal
 CFLAGS := $(SYS_CFLAGS) -Wall
 CXXFLAGS := $(SYS_CXXFLAGS) -Wall
 LDFLAGS := $(SYS_LDFLAGS)
@@ -68,16 +73,18 @@ C2O =		$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $(1) $(2)
 CPP2O =		$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $(1) $(2)
 C2EXE =		$(CC) -o $(1) $(2) $(LDFLAGS)
 CPP2EXE =	$(CXX) -o $(1) $(2) $(LDFLAGS)
-INSTALL_EXE =	cp $(1) $(BIN_DIR);					\
-		chmod 755 $(BIN_DIR)/$(notdir $(1))
-INSTALL_H =	cp $(1) $(INCLUDE_DIR);					\
-		chmod 644 $(INCLUDE_DIR)/$(notdir $(1))
+O2A =		$(AR) rcs $(1) $(2)
+INSTALL_BIN =	$(INSTALL) -m 755 $(1) $(BIN_DIR)
+INSTALL_CH =	$(INSTALL) -m 644 $(1) $(INCLUDE_DIR)
+INSTALL_CPPH =	$(INSTALL) -m 644 $(1) $(INCLUDE_DIR)/c++
+INSTALL_LIB =	$(INSTALL) -m 644 $(1) $(LIB_DIR)
 
 # Set all as the default target
 all:
 
 # Include local makefiles
-include $(foreach d,$(SUBDIRS),$(d)/local.mk)
+include $(foreach d,$(SUBDIRS),$(d)/local.mk)				\
+	$(foreach d,$(TEST_SUBDIRS),$(d)/local.mk)
 
 all: $(foreach d,$(SUBDIRS),$(d)/all)
 
@@ -94,20 +101,50 @@ dist:
 	rm -rf temp/$(DIST_NAME) temp/$(DIST_NAME).tgz
 	mkdir temp/$(DIST_NAME)
 	cp -a `find . -maxdepth 1 -mindepth 1 | grep -v ./temp`		\
-	temp/$(DIST_NAME)
+		temp/$(DIST_NAME)
 	rm -rf `find temp/$(DIST_NAME) -name .svn`
 	cd temp/$(DIST_NAME); ./configure.pl; make realclean
 	rm -f temp/$(DIST_NAME)/system.mk
 	cd temp; tar cfz $(DIST_NAME).tgz $(DIST_NAME)
 
+test:	$(foreach d,$(TEST_SUBDIRS),$(d)/all)				\
+	$(foreach d,$(TEST_SUBDIRS),$(d)/test)
+
+doxygen:
+	$(DOXYGEN) doxygen.config
+
 findattn:
 	$(GREP_RECURSIVE) --ignore-dir=.svn,./temp --ignore-ft=o,d ATTN
+
+help:
+	@echo Primary Targets:
+	@echo '  all                 build all targets in SiLT'
+	@echo '  clean               clean project directories'
+	@echo '  dist                create a distribution of SiLT at'
+	@echo '                      temp/$(DIST_NAME).tgz'
+	@echo '  install             install SiLT'
+	@echo '  test                run tests for SiLT'
+	@echo Secondary Targets
+	@echo '  deps                build *.d files'
+	@echo '  doxygen             create doxygen documentation'
+	@echo '  findattn            find ATTN in source files'
+	@echo '  realclean           completely clean project directories'
+	@echo Subdirectory Targets
+	@echo '  <dir>/all           make all targets in <dir>'
+	@echo '  <dir>/clean         clean <dir>'
+	@echo '  <dir>/install       install <dir>'
+	@echo '  <dir>/realclean     completely clean <dir>'
+	@echo '  test/<subdir>/test  perform tests for test/<subdir>'
 
 installdirs:
 	mkdir -p $(BIN_DIR)
 	chmod 755 $(BIN_DIR)
 	mkdir -p $(INCLUDE_DIR)
 	chmod 755 $(INCLUDE_DIR)
+	mkdir -p $(INCLUDE_DIR)/c++
+	chmod 755 $(INCLUDE_DIR)/c++
+	mkdir -p $(LIB_DIR)
+	chmod 755 $(LIB_DIR)
 
 %.d: %.c
 	$(call C2D,$@,$<)
@@ -120,3 +157,20 @@ installdirs:
 
 %.o: %.cpp
 	$(call CPP2O,$@,$<)
+
+%.a:
+	$(call O2A,$@,$^)
+
+%.bininstall: %
+	$(call INSTALL_BIN,$*)
+
+%.h.chinstall: %.h
+	$(call INSTALL_CH,$<)
+
+%.h.cpphinstall: %.h
+	$(call INSTALL_CPPH,$<)
+
+%.a.ainstall: %.a
+	$(call INSTALL_LIB,$<)
+
+.PHONY: doxygen clean realclean all

@@ -24,9 +24,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-D := runcmd
+D := test/siltgraph/linegraph-000
 
-$(D)_TARGET := $(D)/runcmd
+$(D)_TARGET := $(D)/genlinegraph
+$(D)_RUNTEST_DIR := temp/linegraph-000
 
 $(D)/all: $($(D)_TARGET)
 
@@ -42,11 +43,16 @@ $(D)/realclean: CDIR := $(D)
 $(D)/realclean: $(D)/clean
 	rm -f $(CDIR)/*.d $(CDIR)/*.d.*
 
-include $(subst .c,.d,$(wildcard $(D)/*.c))
+$(D)/test: CDIR := $(D)
 
-$($(D)_TARGET): LDFLAGS := $(LDFLAGS) -lrt
+$(D)/test: $(D)/all
+	@echo '===== Test start for $(CDIR) ====='
+	rm -rf $($(CDIR)_RUNTEST_DIR)
+	mkdir $($(CDIR)_RUNTEST_DIR)
+	sh -c '$($(CDIR)_TARGET) $($(CDIR)_RUNTEST_DIR); echo Return value: $$?'
+	@echo '===== Test end for $(CDIR)   ====='
 
-$($(D)_TARGET): CPPFLAGS := $(CPPFLAGS) -D_GNU_SOURCE
+include $(subst .cpp,.d,$(wildcard $(D)/*.cpp))
 
-$($(D)_TARGET): $(D)/runcmd.o
-	$(call C2EXE,$@,$^)
+$($(D)_TARGET): $(D)/genlinegraph.o siltgraph/libsiltgraph.a
+	$(call CPP2EXE,$@,$^)
