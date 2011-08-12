@@ -1,0 +1,229 @@
+#!/usr/bin/env perl
+
+# Copyright (c) 2011, Ryan M. Lefever
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# DESCRIPTION: The point of this script is to configure silt software
+#              to be built. The result of this script is the creation
+#              of system.mk.
+
+##### enable perl's safety info #####
+use strict;
+use warnings;
+
+use Env;
+Env::import();
+
+##### global variables #####
+my $cmdname = $0;
+my $verbose = 0;
+my $prefix = "/dev/null";
+my $debugBuild = 0;
+my $optLevel = 2;
+my $distname = "silt";
+my $tempdir = "temp";
+my @paths = split /:/, $PATH;
+my $cc = "gcc";
+my $cxx = "g++";
+my @requiredBins =   ( "ar",
+		       "doxygen",
+		       "find",
+		       "gnuplot",
+		       "grep",
+		       "install" );
+my @requiredLibs =   ( "librt" );
+my @requiredHFiles = ( "alloca.h",
+		       "ctype.h",
+		       "fcntl.h",
+		       "float.h",
+		       "limits.h",
+		       "math.h",
+		       "sched.h",
+		       "signal.h",
+		       "stddef.h",
+		       "stdint.h",
+		       "stdio.h",
+		       "stdlib.h",
+		       "string.h",
+		       "sys/resource.h",
+		       "sys/stat.h",
+		       "sys/time.h",
+		       "sys/types.h",
+		       "sys/wait.h",
+		       "time.h",
+		       "unistd.h",
+		       "fstream",
+		       "iostream",
+		       "sstream",
+		       "string",
+		       "vector" );
+
+main();
+exit(0);
+
+sub main{
+  parsecla();
+
+  # Generate the config.status file that stores the command line that
+  # invoked configure.
+  open FH, '> config.status' or die "Unable to open config.status";
+  print FH $cmdname;
+  foreach my $arg (@ARGV){ print FH ' ' . $arg; }
+  print FH "\n";
+  close FH;
+  system("chmod u+x config.status");
+
+  # Check for required binaries
+  my $missingBins = 0;
+  unshift @requiredBins, $cxx;
+  unshift @requiredBins, $cc;
+  foreach my $bin (@requiredBins){
+    print "checking for " . $bin . " ... ";
+    my $foundBin = checkForBin($bin);
+    if($foundBin ne ''){ print $foundBin . "\n";}
+    else{ print "no\n"; $missingBins = 1; }
+  }
+  if($missingBins){ print "Error missing binaries.\n"; }
+
+  # Check for required libraries
+  my $missingLibs = 0;
+  foreach my $lib (@requiredLibs){
+    print "checking for " . $lib . " ... ";
+    if(checkForLib($lib)){ print "yes\n";}
+    else{ print "no\n"; $missingLibs = 1; }
+  }
+  if($missingLibs){ print "Error missing libraries.\n"; }
+
+  # Check for required h files
+  my $missingHFiles = 0;
+  foreach my $hfile (@requiredHFiles){
+    print "checking for " . $hfile . " ... ";
+    if(checkForHFile($hfile)){ print "yes\n";}
+    else{ print "no\n"; $missingHFiles = 1; }
+  }
+  if($missingHFiles){ print "Error missing h files.\n"; }
+
+  # Create the system.mk file which is included by the main makefile.
+  # system.mk contains local system information to the makefile for
+  # use during a silt build.
+  open FH, '> system.mk' or die "Unable to open system.mk";
+  print FH "PREFIX := " . $prefix . "\n";
+  print FH "DIST_NAME := " . $distname . "\n";
+  print FH "CC := " . $cc . "\n";
+  print FH "CXX := " . $cxx . "\n";
+  print FH "SYS_CPPFLAGS :=\n";
+  print FH "SYS_CFLAGS :=";
+  if($debugBuild){ print FH " -g"; }
+  if($optLevel > 0){ print FH " -O" . $optLevel; }
+  print FH "\n";
+  print FH "SYS_CXXFLAGS :=";
+  if($debugBuild){ print FH " -g"; }
+  if($optLevel > 0){ print FH " -O" . $optLevel; }
+  print FH "\n";
+  print FH "SYS_LDFLAGS :=\n";
+  close FH;
+
+  `make deps > /dev/null 2>&1`;
+}
+
+# Check if a library is installed on the system
+sub checkForLib{
+  # ATTN: implement
+  my $lib = shift @_;
+  $lib =~ s/^lib//;
+  my $search = "-l" . $lib;
+  my @output = split /\n/, `$cc $search 2>&1`;
+  foreach my $line (@output){
+    if($line =~ /cannot find $search/){ return 0; }
+  }
+  return 1;
+}
+
+# Check if a binary is installed on the system
+sub checkForBin{
+  my $bin = shift @_;
+  if($bin =~ /\//){ return $bin; }
+  foreach my $p (@paths){
+    my $file = $p . "/" . $bin;
+    if(-X ($p . "/" . $bin)){ return $file; }
+  }
+  return '';
+}
+
+sub checkForHFile{
+  my $hfile = shift @_;
+  my $tmpfile = $tempdir . "/tmp-config-" . $$ . "-" . time() . ".cpp";
+  my $cmd = "rm -f $tmpfile";
+  `$cmd`;
+  $cmd = "echo '#include <" . $hfile . ">' > " . $tmpfile;
+  `$cmd`;
+  $cmd = $cxx . " -c -o /dev/null " . $tmpfile . " 2>&1";
+  `$cmd`;
+  my $rv = $?;
+  $cmd = "rm -f " . $tmpfile;
+  `$cmd`;
+  return ($rv == 0);
+}
+
+sub checkForCFun{
+  # ATTN: implement
+}
+
+# Parse command line arguments
+sub parsecla{
+  foreach my $arg (@ARGV){
+    if($arg =~ /^-/){
+      if($arg eq "-h" || $arg eq "--help"){ usage(); exit(0); }
+      elsif($arg =~ /^--distname=(.+)/){ $distname = $1; }
+      elsif($arg eq "--debug-build"){ $debugBuild = 1; }
+      elsif($arg =~ /^--opt=(0|1|2|3)$/){ $optLevel = $1; }
+      elsif($arg =~ /^--prefix=(.+)/){ $prefix = $1; }
+      elsif($arg eq "--verbose"){ $verbose = 1; }
+      else{ print "Illegal option: " . $arg . "\n"; exit(1); }
+    }
+    elsif($arg =~ /^CC=(.+)/){ $cc = $1; }
+    elsif($arg =~ /^CXX=(.+)/){ $cxx = $1; }
+    else{ print "Illegal positional argument: " . $arg . "\n"; exit(1); }
+  }
+}
+
+# Print information about how configure.pl can be invoked.
+sub usage{
+  print "USAGE: " . $cmdname . " [OPTIONS]
+DESCRIPTION: Configure the build environment
+OPTIONS:
+  -h|--help            print this message
+  --distname=<str>     define a distribution name for the make dist target;
+                       the default is silt
+  --debug-build        enable a debug build
+  --opt=[0,1,2,3]      set the build optimization level; the optimization
+                       levels correspond to gcc -O values; the default is 2
+  --prefix=<dir>       set the installation directory
+  --verbose            enable output verbosity
+  CC=<c compiler>      specify c compiler
+  CXX=<c++ compiler>   specify c++ compiler
+";
+}

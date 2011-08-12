@@ -1,0 +1,93 @@
+#!/usr/bin/env perl
+
+# Copyright (c) 2011, Ryan M. Lefever
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# DESCRIPTION: Replace all lines in a file that match a regular expression.
+
+# enable perl's safety info
+use strict;
+use warnings;
+
+# Global variables
+my $infile = '';
+my $outfile = '';
+my $regex = '';
+my $replacement = '';
+
+main();
+exit(0);
+
+# Perform the main logic.
+sub main{
+  parsecla();
+
+  open RFH, $infile or die "Unable to open $infile.";
+
+  my $cmd = "cp -a " . $infile . " " . $outfile;
+  `$cmd`;
+
+  open WFH, "> " . $outfile or die "Unable to open $outfile.";
+
+  my $line;
+  while ($line = <RFH>){
+    if ($line =~ /^$regex/){ print WFH $replacement . "\n"; }
+    else{ print WFH $line; }
+  }
+
+  close WFH;
+  close RFH;
+}
+
+# Parse command line arguments
+sub parsecla{
+  foreach my $arg (@ARGV){
+    if($arg =~ /^-/){
+      if($arg eq "--help" || $arg eq "-h"){ usage(); exit(0); }
+      else{ print STDERR "Illegal option.\n"; exit(1); }
+    }
+    elsif($infile eq ''){ $infile = $arg; }
+    elsif($outfile eq ''){ $outfile = $arg; }
+    elsif($regex eq ''){ $regex = $arg; }
+    elsif($replacement eq ''){ $replacement = $arg; }
+    else{ print STDERR "Illegal positional argument.\n"; exit(1); }
+  }
+}
+
+# Print usage info.
+sub usage{
+  print "replaceline [OPTIONS] <in file> <out file> <regexp> <replacement>
+DESCRIPTION: Copy the in file to the out file, replacing lines that start
+             with the specified regular expression with the replacement
+             text. The regular expression is a perl regular expression;
+             therefore, certain characters may need to be escaped. For
+             example to replace a \$ a \\ should be added in front of it.
+             This program is part of the SiLT project:
+             http://code.google.com/p/silt
+OPTIONS:
+  --help,-h  print this message
+";
+}
