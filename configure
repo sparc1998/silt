@@ -34,6 +34,9 @@
 use strict;
 use warnings;
 
+use Env;
+Env::import();
+
 ##### global variables #####
 my $cmdname = $0;
 my $verbose = 0;
@@ -41,6 +44,42 @@ my $prefix = "/dev/null";
 my $debugBuild = 0;
 my $optLevel = 2;
 my $distname = "silt";
+my $tempdir = "temp";
+my @paths = split /:/, $PATH;
+my $cc = "gcc";
+my $cxx = "g++";
+my @requiredBins =   ( "ar",
+		       "doxygen",
+		       "find",
+		       "gnuplot",
+		       "grep",
+		       "install" );
+my @requiredLibs =   ( "librt" );
+my @requiredHFiles = ( "alloca.h",
+		       "ctype.h",
+		       "fcntl.h",
+		       "float.h",
+		       "limits.h",
+		       "math.h",
+		       "sched.h",
+		       "signal.h",
+		       "stddef.h",
+		       "stdint.h",
+		       "stdio.h",
+		       "stdlib.h",
+		       "string.h",
+		       "sys/resource.h",
+		       "sys/stat.h",
+		       "sys/time.h",
+		       "sys/types.h",
+		       "sys/wait.h",
+		       "time.h",
+		       "unistd.h",
+		       "fstream",
+		       "iostream",
+		       "sstream",
+		       "string",
+		       "vector" );
 
 main();
 exit(0);
@@ -57,12 +96,44 @@ sub main{
   close FH;
   system("chmod u+x config.status");
 
+  # Check for required binaries
+  my $missingBins = 0;
+  unshift @requiredBins, $cxx;
+  unshift @requiredBins, $cc;
+  foreach my $bin (@requiredBins){
+    print "checking for " . $bin . " ... ";
+    my $foundBin = checkForBin($bin);
+    if($foundBin ne ''){ print $foundBin . "\n";}
+    else{ print "not found\n"; $missingBins = 1; }
+  }
+  if($missingBins){ print "Error missing binaries.\n"; }
+
+  # Check for required libraries
+  my $missingLibs = 0;
+  foreach my $lib (@requiredLibs){
+    print "checking for " . $lib . " ... ";
+    if(checkForLib($lib)){ print "found\n";}
+    else{ print "not found\n"; $missingLibs = 1; }
+  }
+  if($missingLibs){ print "Error missing libraries.\n"; }
+
+  # Check for required h files
+  my $missingHFiles = 0;
+  foreach my $hfile (@requiredHFiles){
+    print "checking for " . $hfile . " ... ";
+    if(checkForHFile($hfile)){ print "found\n";}
+    else{ print "not found\n"; $missingHFiles = 1; }
+  }
+  if($missingHFiles){ print "Error missing h files.\n"; }
+
   # Create the system.mk file which is included by the main makefile.
   # system.mk contains local system information to the makefile for
   # use during a silt build.
   open FH, '> system.mk' or die "Unable to open system.mk";
   print FH "PREFIX := " . $prefix . "\n";
   print FH "DIST_NAME := " . $distname . "\n";
+  print FH "CC := " . $cc . "\n";
+  print FH "CXX := " . $cxx . "\n";
   print FH "SYS_CPPFLAGS :=\n";
   print FH "SYS_CFLAGS :=";
   if($debugBuild){ print FH " -g"; }
@@ -78,6 +149,49 @@ sub main{
   `make deps > /dev/null 2>&1`;
 }
 
+# Check if a library is installed on the system
+sub checkForLib{
+  # ATTN: implement
+  my $lib = shift @_;
+  $lib =~ s/^lib//;
+  my $search = "-l" . $lib;
+  my @output = split /\n/, `$cc $search 2>&1`;
+  foreach my $line (@output){
+    if($line =~ /cannot find $search/){ return 0; }
+  }
+  return 1;
+}
+
+# Check if a binary is installed on the system
+sub checkForBin{
+  my $bin = shift @_;
+  if($bin =~ /\//){ return $bin; }
+  foreach my $p (@paths){
+    my $file = $p . "/" . $bin;
+    if(-X ($p . "/" . $bin)){ return $file; }
+  }
+  return '';
+}
+
+sub checkForHFile{
+  my $hfile = shift @_;
+  my $tmpfile = $tempdir . "/tmp-config-" . $$ . "-" . time() . ".cpp";
+  my $cmd = "rm -f $tmpfile";
+  `$cmd`;
+  $cmd = "echo '#include <" . $hfile . ">' > " . $tmpfile;
+  `$cmd`;
+  $cmd = $cxx . " -c -o /dev/null " . $tmpfile . " 2>&1";
+  `$cmd`;
+  my $rv = $?;
+  $cmd = "rm -f " . $tmpfile;
+  `$cmd`;
+  return ($rv == 0);
+}
+
+sub checkForCFun{
+  # ATTN: implement
+}
+
 # Parse command line arguments
 sub parsecla{
   foreach my $arg (@ARGV){
@@ -90,6 +204,8 @@ sub parsecla{
       elsif($arg eq "--verbose"){ $verbose = 1; }
       else{ print "Illegal option: " . $arg . "\n"; exit(1); }
     }
+    elsif($arg =~ /^CC=(.+)/){ $cc = $1; }
+    elsif($arg =~ /^CXX=(.+)/){ $cxx = $1; }
     else{ print "Illegal positional argument: " . $arg . "\n"; exit(1); }
   }
 }
@@ -97,9 +213,7 @@ sub parsecla{
 # Print information about how configure.pl can be invoked.
 sub usage{
   print "USAGE: " . $cmdname . " [OPTIONS]
-
 DESCRIPTION: Configure the build environment
-
 OPTIONS:
   -h|--help            print this message
   --distname=<str>     define a distribution name for the make dist target;
@@ -109,5 +223,7 @@ OPTIONS:
                        levels correspond to gcc -O values; the default is 2
   --prefix=<dir>       set the installation directory
   --verbose            enable output verbosity
+  CC=<c compiler>      specify c compiler
+  CXX=<c++ compiler>   specify c++ compiler
 ";
 }
