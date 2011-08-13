@@ -36,7 +36,7 @@ int main(int argc, char** argv){
   LineGraph lg;
   lg.setTitle ("Graph Title");
   lg.setIncludeLegend (true);
-  lg.setAddTimestamp (true);
+  lg.setUseTimestamp (true);
   lg.setDisplayGrid (true);
   lg.setXaxisTitle("XAXIS");
   lg.setYaxisTitle("YAXIS");
