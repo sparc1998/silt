@@ -35,9 +35,11 @@
 
 using namespace silt;
 
-silt::SiltGraph::SiltGraph() : _title(""),
-			       _addTimestamp(true),
-			       _displayGrid(false) {}
+silt::SiltGraph::SiltGraph() :
+  _title(""), _timestamp(true), _grid(false), _includeLegend(true),
+  _xaxisTitle(""), _yaxisTitle(""),
+  _xmin((double)NAN), _xmax((double)NAN), _xInterval((double)NAN),
+  _ymin((double)NAN), _ymax((double)NAN), _yInterval((double)NAN) {}
 
 /// Generates the graph in the desired output. True is returned if the
 /// graph generation is successful.
@@ -60,10 +62,40 @@ bool silt::SiltGraph::generate(enum OutputType ot, std::string baseFilename){
   // Data missing string
   gplotFile << "set datafile missing '" << NAN_STR << "'\n";
   // Timestamp
-  if(_addTimestamp){ gplotFile << "set time\n"; }
+  if(_timestamp){ gplotFile << "set time\n"; }
   // Gridlines
-  if(_displayGrid){ gplotFile << "set grid\n"; }
-  // Child class output gnuplot directives
+  if(_grid){ gplotFile << "set grid\n"; }
+  // Legend
+  if(isLegendAvailable()){
+    if(_includeLegend){ gplotFile << "set key outside\n"; }
+    else{ gplotFile << "set key off\n"; }
+  }
+  else{ gplotFile << "set key off\n"; }
+  // x-axis label
+  if(!_xaxisTitle.empty()){
+    gplotFile << "set xlabel '" << _xaxisTitle << "'\n";
+  }
+  // y-axis label
+  if(!_yaxisTitle.empty()){
+    gplotFile << "set ylabel '" << _yaxisTitle << "'\n";
+  }
+  if(isXAxisNumeric()){
+    // x range
+    if(!isnan(_xmin) && !isnan(_xmax)){
+      gplotFile << "set xrange [" << _xmin << ":" << _xmax << "]\n";
+    }
+    // x interval
+    if(!isnan(_xInterval)){ gplotFile << "set xtics " << _xInterval << "\n"; }
+  }
+  if(isYAxisNumeric()){
+    // y range
+    if(!isnan(_ymin) && !isnan(_ymax)){
+      gplotFile << "set yrange [" << _ymin << ":" << _ymax << "]\n";
+    }
+    // y interval
+    if(!isnan(_yInterval)){ gplotFile << "set ytics " << _yInterval << "\n"; }
+  }
+  // Child class gnuplot directives
   if(!outputGplotDirectives(gplotFile, baseFilename)){ return false; }
   gplotFile.close();
 
@@ -87,8 +119,61 @@ bool silt::SiltGraph::generate(enum OutputType ot, std::string baseFilename){
   return true;
 }
 
+void silt::SiltGraph::setIncludeLegend(bool val){
+  myassert(isLegendAvailable(),
+	   "Legends are not available for " << graphType());
+  _includeLegend = val;
+}
+
+bool silt::SiltGraph::getIncludeLegend(void){
+  myassert(isLegendAvailable(),
+	   "Legends are not available for " << graphType());
+  return _includeLegend;
+}
+
+void silt::SiltGraph::setXrange(double min, double max){
+  myassert(isXAxisNumeric(), "The x axis is not numeric for " << graphType());
+  _xmin = min; _xmax = max;
+}
+
+silt::SiltGraph::DoublePair silt::SiltGraph::getXrange(void){
+  myassert(isXAxisNumeric(), "The x axis is not numeric for " << graphType());
+  return DoublePair(_xmin, _xmax);
+}
+
+void silt::SiltGraph::setXticInterval(double interval){
+  myassert(isXAxisNumeric(), "The x axis is not numeric for " << graphType());
+  _xInterval = interval;
+}
+
+double silt::SiltGraph::getXticInterval(void){
+  myassert(isXAxisNumeric(), "The x axis is not numeric for " << graphType());
+  return _xInterval;
+}
+
+void silt::SiltGraph::setYrange(double min, double max){
+  myassert(isYAxisNumeric(), "The y axis is not numeric for " << graphType());
+  _ymin = min; _ymax = max;
+}
+
+silt::SiltGraph::DoublePair silt::SiltGraph::getYrange(void){
+  myassert(isYAxisNumeric(), "The y axis is not numeric for " << graphType());
+  return DoublePair(_ymin, _ymax);
+}
+
+void silt::SiltGraph::setYticInterval(double interval){
+  myassert(isYAxisNumeric(), "The y axis is not numeric for " << graphType());
+ _yInterval = interval;
+}
+
+double silt::SiltGraph::getYticInterval(void){
+  myassert(isYAxisNumeric(), "The y axis is not numeric for " << graphType());
+ return _yInterval;
+}
+
 std::string silt::SiltGraph::getOutputLine(enum OutputType ot,
 					   std::string baseFilename){
+
   switch(ot){
   case SGT_GNUPLOT: return "";
   case SGT_PNG: return std::string("set output '") + baseFilename + ".png'\n";
@@ -109,17 +194,7 @@ std::string silt::LineGraph::DataSeries::str(void){
     silt::int2str<DataVector::size_type>(data.size());
 }
 
-silt::LineGraph::LineGraph() : SiltGraph(),
-			       _includeLegend(true),
-			       _xaxisTitle(""),
-			       _yaxisTitle(""),
-			       _xmin((double)NAN),
-			       _xmax((double)NAN),
-			       _ymin((double)NAN),
-			       _ymax((double)NAN),
-			       _xInterval((double)NAN),
-			       _yInterval((double)NAN),
-			       _data() {}
+silt::LineGraph::LineGraph() : SiltGraph(), _data() {}
 
 silt::LineGraph::~LineGraph(){
   DataCollectionIt it, endit;
@@ -136,48 +211,15 @@ void silt::LineGraph::nameDataSeries(unsigned dataSeriesIndex,
 
 /// Add a data value to the graph.
 void silt::LineGraph::add(unsigned dataSeriesIndex, double x, double y){
-  getDataSeries(dataSeriesIndex)->data.push_back(DataValue(x,y));
+  getDataSeries(dataSeriesIndex)->data.push_back(DoublePair(x,y));
 }
 
-void silt::LineGraph::add(unsigned dataSeriesIndex, DataValue& v){
-  add(dataSeriesIndex, v.x, v.y);
-}
-
-silt::LineGraph::DataSeries*
-silt::LineGraph::getDataSeries(unsigned dataSeriesIndex){
-  if(dataSeriesIndex >= _data.size()){
-    _data.insert(_data.end(), (dataSeriesIndex - _data.size() + 1), NULL);
-  }
-  DataSeries* ds = _data[dataSeriesIndex];
-  if(!ds){
-    ds = new DataSeries;
-    ds->name = std::string("Series ") + int2str<unsigned>(dataSeriesIndex);
-    _data[dataSeriesIndex] = ds;
-  }
-  return ds;
+void silt::LineGraph::add(unsigned dataSeriesIndex, DoublePair& v){
+  add(dataSeriesIndex, v.v1, v.v2);
 }
 
 bool silt::LineGraph::outputGplotDirectives(std::ostream& o,
 					    std::string baseFilename){
-  // Legend
-  if(_includeLegend){ o << "set key outside\n"; }
-  else{ o << "set key off\n"; }
-  // x-axis label
-  if(!_xaxisTitle.empty()){ o << "set xlabel '" << _xaxisTitle << "'\n"; }
-  // y-axis label
-  if(!_yaxisTitle.empty()){ o << "set ylabel '" << _yaxisTitle << "'\n"; }
-  // x range
-  if(!isnan(_xmin) && !isnan(_xmax)){
-    o << "set xrange [" << _xmin << ":" << _xmax << "]\n";
-  }
-  // y range
-  if(!isnan(_ymin) && !isnan(_ymax)){
-    o << "set yrange [" << _ymin << ":" << _ymax << "]\n";
-  }
-  // x interval
-  if(!isnan(_xInterval)){ o << "set xtics " << _xInterval << "\n"; }
-  // y interval
-  if(!isnan(_yInterval)){ o << "set ytics " << _yInterval << "\n"; }
   // plot command
   o << "plot";
   DataCollectionIt it, endit;
@@ -216,10 +258,10 @@ bool silt::LineGraph::outputDataFiles(enum OutputType ot,
       DataVectorIt dvIt, endDvIt;
       for(dvIt = ds->data.begin(), endDvIt = ds->data.end();
 	  dvIt != endDvIt; ++dvIt){
-	DataValue v = *dvIt;
+	DoublePair v = *dvIt;
 	// We use fp2str because it will convert NAN to a "nan" string
-	dataFile << silt::fp2str<double>(v.x) << "\t"
-		 << silt::fp2str<double>(v.y) << "\n";
+	dataFile << silt::fp2str<double>(v.v1) << "\t"
+		 << silt::fp2str<double>(v.v2) << "\n";
       }
       // Close data file
       dataFile.close();
@@ -229,4 +271,18 @@ bool silt::LineGraph::outputDataFiles(enum OutputType ot,
   }
 
   return true;
+}
+
+silt::LineGraph::DataSeries*
+silt::LineGraph::getDataSeries(unsigned dataSeriesIndex){
+  if(dataSeriesIndex >= _data.size()){
+    _data.insert(_data.end(), (dataSeriesIndex - _data.size() + 1), NULL);
+  }
+  DataSeries* ds = _data[dataSeriesIndex];
+  if(!ds){
+    ds = new DataSeries;
+    ds->name = std::string("Series ") + int2str<unsigned>(dataSeriesIndex);
+    _data[dataSeriesIndex] = ds;
+  }
+  return ds;
 }
