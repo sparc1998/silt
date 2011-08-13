@@ -47,8 +47,6 @@ namespace silt{
 
     void setTitle(std::string t){ _title = t; }
     std::string getTitle(void){ return _title; }
-    void setIncludeLegend(bool val){ _includeLegend = val; }
-    bool getIncludeLegend(void){ return _includeLegend; }
     void setAddTimestamp(bool val){ _addTimestamp = val; }
     bool getAddTimestamp(void){ return _addTimestamp; }
     void setDisplayGrid(bool val){ _displayGrid = val; }
@@ -56,7 +54,6 @@ namespace silt{
 
   protected:
     std::string _title;
-    bool _includeLegend;
     bool _addTimestamp;
     bool _displayGrid;
 
@@ -88,6 +85,8 @@ namespace silt{
     LineGraph();
     virtual ~LineGraph();
 
+    void setIncludeLegend(bool val){ _includeLegend = val; }
+    bool getIncludeLegend(void){ return _includeLegend; }
     void setXaxisTitle(std::string t){ _xaxisTitle = t; }
     std::string getXaxisTitle(void){ return _xaxisTitle; }
     void setYaxisTitle(std::string t){ _yaxisTitle = t; }
@@ -105,6 +104,7 @@ namespace silt{
     void add(unsigned dataSeriesIndex, DataValue& v);
 
   protected:
+    bool _includeLegend;
     std::string _xaxisTitle;
     std::string _yaxisTitle;
     double _xmin;

@@ -36,7 +36,6 @@
 using namespace silt;
 
 silt::SiltGraph::SiltGraph() : _title(""),
-			       _includeLegend(true),
 			       _addTimestamp(true),
 			       _displayGrid(false) {}
 
@@ -60,9 +59,6 @@ bool silt::SiltGraph::generate(enum OutputType ot, std::string baseFilename){
   if(!_title.empty()){ gplotFile << "set title '" << _title << "'\n"; }
   // Data missing string
   gplotFile << "set datafile missing '" << NAN_STR << "'\n";
-  // Legend
-  if(_includeLegend){ gplotFile << "set key outside\n"; }
-  else{ gplotFile << "set key off\n"; }
   // Timestamp
   if(_addTimestamp){ gplotFile << "set time\n"; }
   // Gridlines
@@ -114,6 +110,7 @@ std::string silt::LineGraph::DataSeries::str(void){
 }
 
 silt::LineGraph::LineGraph() : SiltGraph(),
+			       _includeLegend(true),
 			       _xaxisTitle(""),
 			       _yaxisTitle(""),
 			       _xmin((double)NAN),
@@ -162,6 +159,9 @@ silt::LineGraph::getDataSeries(unsigned dataSeriesIndex){
 
 bool silt::LineGraph::outputGplotDirectives(std::ostream& o,
 					    std::string baseFilename){
+  // Legend
+  if(_includeLegend){ o << "set key outside\n"; }
+  else{ o << "set key off\n"; }
   // x-axis label
   if(!_xaxisTitle.empty()){ o << "set xlabel '" << _xaxisTitle << "'\n"; }
   // y-axis label
@@ -187,7 +187,7 @@ bool silt::LineGraph::outputGplotDirectives(std::ostream& o,
     if(ds && !ds->name.empty() && !ds->data.empty()){
       if(datafileCount != 0){ o << ","; }
       o << " '" << baseFilename << "-" << datafileCount << ".data' using "
-	<< "1:2" << " title '" << ds->name << "' with linespoints";
+	<< "1:2" << " title columnheader with linespoints";
       ++datafileCount;
     }
   }
@@ -212,6 +212,7 @@ bool silt::LineGraph::outputDataFiles(enum OutputType ot,
 	mywarn(0, "Unable to open " << dataFilename << ".");
 	return false;
       }
+      dataFile << "\"\"\t\"" << ds->name << "\"\n";
       DataVectorIt dvIt, endDvIt;
       for(dvIt = ds->data.begin(), endDvIt = ds->data.end();
 	  dvIt != endDvIt; ++dvIt){

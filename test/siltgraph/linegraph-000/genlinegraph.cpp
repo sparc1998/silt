@@ -45,7 +45,7 @@ int main(int argc, char** argv){
   lg.setXticInterval(.1);
   lg.setYticInterval(10);
 
-  lg.nameDataSeries(0, "nails");
+  lg.nameDataSeries(0, "nails 1 2 3");
   lg.add(0, .1, 56);
   lg.add(0, .23, 56);
   lg.add(0, .4, 26);
