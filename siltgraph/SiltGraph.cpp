@@ -35,6 +35,10 @@
 
 using namespace silt;
 
+//////////////////////
+///// Silt Graph /////
+//////////////////////
+
 silt::SiltGraph::SiltGraph() :
   _title(""), _timestamp(true), _grid(false), _includeLegend(true),
   _xaxisTitle(""), _yaxisTitle(""),
@@ -194,7 +198,9 @@ std::string silt::LineGraph::DataSeries::str(void){
     silt::int2str<DataVector::size_type>(data.size());
 }
 
-silt::LineGraph::LineGraph() : SiltGraph(), _data() {}
+//////////////////////
+///// Line Graph /////
+//////////////////////
 
 silt::LineGraph::~LineGraph(){
   DataCollectionIt it, endit;
@@ -285,4 +291,45 @@ silt::LineGraph::getDataSeries(unsigned dataSeriesIndex){
     _data[dataSeriesIndex] = ds;
   }
   return ds;
+}
+
+/////////////////////
+///// Histogram /////
+/////////////////////
+
+void silt::Histogram::add(std::string name, double value){
+  _data.push_back(DataValue(name, value));
+}
+
+bool silt::Histogram::outputGplotDirectives(std::ostream& o,
+					    std::string baseFilename){
+  o << "set style data histogram\n";
+  o << "set style histogram cluster gap 1\n";
+  o << "set style fill solid border -1\n";
+  // plot command
+  o << "plot '" << baseFilename << "-0.data' using 2:xtic(1) linecolor "
+    << "rgbcolor \"#66CC66\"\n";
+
+  return true;
+}
+
+bool silt::Histogram::outputDataFiles(enum OutputType ot,
+				      std::string baseFilename){
+  std::string dataFilename = baseFilename + "-0.data";
+  // Open data file
+  std::ofstream dataFile(dataFilename.c_str(),
+			 std::ios::out | std::ios::trunc);
+  if(!dataFile.is_open()){
+    mywarn(0, "Unable to open " << dataFilename << ".");
+    return false;
+  }
+  DataCollectionIt dcIt, endDcIt;
+  for(dcIt = _data.begin(), endDcIt = _data.end(); dcIt != endDcIt; ++dcIt){
+    DataValue& dv = *dcIt;
+    dataFile << "\"" << dv.name << "\"\t" << dv.value << "\n";
+  }
+  // Close data file
+  dataFile.close();
+  
+  return true;
 }
