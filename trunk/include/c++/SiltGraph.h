@@ -110,10 +110,10 @@ namespace silt{
     typedef std::vector<DataSeries*> DataCollection;
     typedef DataCollection::iterator DataCollectionIt;
 
-    LineGraph();
+    LineGraph() : SiltGraph(), _data() {}
     virtual ~LineGraph();
 
-    virtual inline std::string graphType(void){ return "line graph"; }
+    virtual inline std::string graphType(void){ return "a line graph"; }
     virtual inline bool isLegendAvailable(void){ return true; }
     virtual inline bool isXAxisNumeric(void){ return true; }
     virtual inline bool isYAxisNumeric(void){ return true; }
@@ -130,6 +130,35 @@ namespace silt{
     virtual bool outputDataFiles(enum OutputType ot,
 				 std::string baseFilename);
     DataSeries* getDataSeries(unsigned dataSeriesIndex);
+  };
+
+  class Histogram : public SiltGraph{
+  public:
+    struct DataValue{
+      std::string name;
+      double value;
+      DataValue(std::string n, double v) : name(n), value(v) {}
+    };
+    typedef std::vector<DataValue> DataCollection;
+    typedef DataCollection::iterator DataCollectionIt;
+
+    Histogram() : SiltGraph(), _data() {}
+    virtual ~Histogram() {}
+
+    virtual inline std::string graphType(void){ return "a histogram"; }
+    virtual inline bool isLegendAvailable(void){ return false; }
+    virtual inline bool isXAxisNumeric(void){ return false; }
+    virtual inline bool isYAxisNumeric(void){ return true; }
+
+    void add(std::string name, double value);
+
+  protected:
+    DataCollection _data;
+
+    virtual bool outputGplotDirectives(std::ostream& o,
+				       std::string baseFilename);
+    virtual bool outputDataFiles(enum OutputType ot,
+				 std::string baseFilename);
   };
 }
 
