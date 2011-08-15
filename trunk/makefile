@@ -36,17 +36,18 @@ GREP_RECURSIVE :=	utils/grep-recursive
 REPLACELINE :=		utils/replaceline
 
 # Directory paths
-SUBDIRS :=						\
-			getctypeinfo			\
-			include				\
-			include/c++			\
-			include_internal		\
-			include_internal/c++		\
-			runcmd				\
-			siltgraph			\
+SUBDIRS :=							\
+			getctypeinfo				\
+			include					\
+			include/c++				\
+			include_internal			\
+			include_internal/c++			\
+			runcmd					\
+			siltgraph				\
 			utils
-TEST_SUBDIRS :=		test/siltgraph/linegraph-000	\
-			test/siltgraph/histogram-000
+TEST_SUBDIRS :=		test/siltgraph/linegraph-000		\
+			test/siltgraph/histogram-000		\
+			test/siltgraph/clusteredhistogram-000
 BIN_DIR := $(PREFIX)/bin
 INCLUDE_DIR := $(PREFIX)/include
 LIB_DIR := $(PREFIX)/lib
