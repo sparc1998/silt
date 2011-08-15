@@ -113,10 +113,10 @@ namespace silt{
     LineGraph() : SiltGraph(), _data() {}
     virtual ~LineGraph();
 
-    virtual inline std::string graphType(void){ return "a line graph"; }
-    virtual inline bool isLegendAvailable(void){ return true; }
-    virtual inline bool isXAxisNumeric(void){ return true; }
-    virtual inline bool isYAxisNumeric(void){ return true; }
+    virtual std::string graphType(void){ return "a line graph"; }
+    virtual bool isLegendAvailable(void){ return true; }
+    virtual bool isXAxisNumeric(void){ return true; }
+    virtual bool isYAxisNumeric(void){ return true; }
 
     void nameDataSeries(unsigned dataSeriesIndex, std::string name);
     void add(unsigned dataSeriesIndex, double x, double y);
@@ -145,10 +145,10 @@ namespace silt{
     Histogram() : SiltGraph(), _data() {}
     virtual ~Histogram() {}
 
-    virtual inline std::string graphType(void){ return "a histogram"; }
-    virtual inline bool isLegendAvailable(void){ return false; }
-    virtual inline bool isXAxisNumeric(void){ return false; }
-    virtual inline bool isYAxisNumeric(void){ return true; }
+    virtual std::string graphType(void){ return "a histogram"; }
+    virtual bool isLegendAvailable(void){ return false; }
+    virtual bool isXAxisNumeric(void){ return false; }
+    virtual bool isYAxisNumeric(void){ return true; }
 
     void add(std::string name, double value);
 
@@ -160,6 +160,40 @@ namespace silt{
     virtual bool outputDataFiles(enum OutputType ot,
 				 std::string baseFilename);
   };
+
+  class ClusteredHistogram : public SiltGraph{
+  public:
+    typedef std::vector<std::string> StrVector;
+    typedef StrVector::iterator StrVectorIt;
+    typedef std::vector<double> ClusterOfValues;
+    typedef ClusterOfValues::iterator ClusterOfValuesIt;
+    typedef std::vector<ClusterOfValues*> CollectionOfClusters;
+    typedef CollectionOfClusters::iterator CollectionOfClustersIt;
+
+    ClusteredHistogram();
+    virtual ~ClusteredHistogram();
+
+    virtual std::string graphType(void){ return "a clustered histogram"; }
+    virtual bool isLegendAvailable(void){ return true; }
+    virtual bool isXAxisNumeric(void){ return false; }
+    virtual bool isYAxisNumeric(void){ return true; }
+
+    void nameCluster(unsigned clusterIndex, std::string name);
+    void nameDataSeries(unsigned dataSeriesIndex, std::string name);
+    void add(unsigned clusterIndex, unsigned dataSeriesIndex, double value);
+
+  protected:
+    StrVector _dataSeriesLabels;
+    StrVector _clusterLabels;
+    CollectionOfClusters _data;
+
+    virtual bool outputGplotDirectives(std::ostream& o,
+				       std::string baseFilename);
+    virtual bool outputDataFiles(enum OutputType ot,
+				 std::string baseFilename);
+    void fillin(void);
+  };
+
 }
 
 #endif // _SILTGRAPH_H_

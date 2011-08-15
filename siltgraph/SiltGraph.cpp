@@ -333,3 +333,131 @@ bool silt::Histogram::outputDataFiles(enum OutputType ot,
   
   return true;
 }
+
+///////////////////////////////
+///// Clustered Histogram /////
+///////////////////////////////
+
+silt::ClusteredHistogram::ClusteredHistogram() : SiltGraph(),
+						 _dataSeriesLabels(),
+						 _clusterLabels(),
+						 _data() {}
+
+silt::ClusteredHistogram::~ClusteredHistogram(){
+  CollectionOfClustersIt it, endit;
+  for(it = _data.begin(), endit = _data.end(); it != endit; ++it){
+    ClusterOfValues* cov = *it;
+    if(cov){ delete cov; }
+  }
+}
+
+void silt::ClusteredHistogram::nameCluster(unsigned clusterIndex,
+					   std::string name){
+  while(_clusterLabels.size() < (clusterIndex + 1)){
+    _clusterLabels.push_back("\"\"");
+  }
+  _clusterLabels[clusterIndex] = name;
+  fillin();
+}
+
+void silt::ClusteredHistogram::nameDataSeries(unsigned dataSeriesIndex,
+					      std::string name){
+  while(_dataSeriesLabels.size() < (dataSeriesIndex + 1)){
+    _dataSeriesLabels.push_back(std::string("Series ") +
+				int2str<unsigned>(dataSeriesIndex));
+  }
+  _dataSeriesLabels[dataSeriesIndex] = name;
+  fillin();
+}
+
+void silt::ClusteredHistogram::add(unsigned clusterIndex,
+				   unsigned dataSeriesIndex, double value){
+  while(_clusterLabels.size() < (clusterIndex + 1)){
+    _clusterLabels.push_back("\"\"");
+  }
+  while(_dataSeriesLabels.size() < (dataSeriesIndex + 1)){
+    _dataSeriesLabels.push_back(std::string("Series ") +
+				int2str<unsigned>(dataSeriesIndex));
+  }
+  fillin();
+  ClusterOfValues* cov = _data[clusterIndex];
+  myassert(cov, "Cluster of values is not defined.");
+  (*cov)[dataSeriesIndex] = value;
+}
+
+bool silt::ClusteredHistogram::outputGplotDirectives(std::ostream& o,
+						     std::string baseFilename){
+  o << "set style data histogram\n";
+  o << "set style histogram cluster gap 1\n";
+  o << "set style fill solid border -1\n";
+  // plot command
+  o << "plot";
+  unsigned i;
+  unsigned numDs = _dataSeriesLabels.size();
+  for(i = 0; i < numDs; ++i){
+    if(i != 0){ o << ","; }
+    o << " '";
+    if(i == 0){ o << baseFilename << "-0.data"; }
+    o << "' using " << (i+2);
+    if(i == 0){ o << ":xtic(1)"; }
+    o << " title columnheader";
+  }
+  o << "\n";
+
+  return true;
+}
+
+bool silt::ClusteredHistogram::outputDataFiles(enum OutputType ot,
+					       std::string baseFilename){
+  std::string dataFilename = baseFilename + "-0.data";
+  // Open data file
+  std::ofstream dataFile(dataFilename.c_str(),
+			 std::ios::out | std::ios::trunc);
+  if(!dataFile.is_open()){
+    mywarn(0, "Unable to open " << dataFilename << ".");
+    return false;
+  }
+  unsigned clusterCount = _clusterLabels.size();
+  unsigned dsCount = _dataSeriesLabels.size();  
+  dataFile << "\"\"";
+  StrVectorIt svit, endsvit;
+  for(svit = _dataSeriesLabels.begin(), endsvit = _dataSeriesLabels.end();
+      svit != endsvit; ++svit){
+    dataFile << "\t" << *svit;
+  }
+  dataFile << "\n";
+  myassert(clusterCount == _data.size(), "Mismatch in cluster count.");
+  CollectionOfClustersIt cocit, endcocit;
+  unsigned clusterIndex;
+  for(cocit = _data.begin(), endcocit = _data.end(), clusterIndex = 0;
+      cocit != endcocit; ++cocit, ++clusterIndex){
+    ClusterOfValues* cov = *cocit;
+    myassert(cov, "Collection of values undefined.");
+    myassert(cov->size() == dsCount, "Mismatch in data series count.");
+    dataFile << _clusterLabels[clusterIndex];
+    ClusterOfValuesIt covit, endcovit;
+    for(covit = cov->begin(), endcovit = cov->end(); covit != endcovit;
+	++covit){
+      dataFile << "\t" << fp2str<double>(*covit);
+    }
+    dataFile << "\n";
+  }
+  // Close data file
+  dataFile.close();
+
+  return true;
+}
+
+void silt::ClusteredHistogram::fillin(void){
+  unsigned clusterCount = _clusterLabels.size();
+  unsigned dsCount = _dataSeriesLabels.size();
+  while(_data.size() < clusterCount){
+    _data.push_back(new ClusterOfValues);
+  }
+  CollectionOfClustersIt it, endit;
+  for(it = _data.begin(), endit = _data.end(); it != endit; ++it){
+    ClusterOfValues* cov = *it;
+    myassert(cov, "Cluster of values not defined.");
+    while(cov->size() < dsCount){ cov->push_back((double)NAN); }
+  }
+}
