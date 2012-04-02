@@ -45,7 +45,8 @@ SUBDIRS :=							\
 			runcmd					\
 			siltgraph				\
 			utils
-TEST_SUBDIRS :=		test/siltgraph/linegraph-000		\
+TEST_SUBDIRS :=							\
+			test/siltgraph/linegraph-000		\
 			test/siltgraph/histogram-000		\
 			test/siltgraph/clusteredhistogram-000
 BIN_DIR := $(PREFIX)/bin
@@ -172,6 +173,9 @@ installdirs:
 	$(call INSTALL_CPPH,$<)
 
 %.a.ainstall: %.a
+	$(call INSTALL_LIB,$<)
+
+%.pm.pminstall: %.pm
 	$(call INSTALL_LIB,$<)
 
 .PHONY: doxygen clean realclean all

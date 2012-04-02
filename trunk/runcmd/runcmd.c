@@ -222,7 +222,7 @@ void parseCla(int argc, char** argv){
 	myerror("Illegal argument: %s", arg);
       }
     }
-    else{ myerror("Illegal argument: %s", arg); }
+    else{ myerror("Illegal argument: %s. Did you forget the '--'?", arg); }
   }
 
   myerror("No command specified.");

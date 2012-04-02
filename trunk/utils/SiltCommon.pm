@@ -1,4 +1,4 @@
-# Copyright (c) 2011, Ryan M. Lefever
+# Copyright (c) 2012, Ryan M. Lefever
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,26 +24,60 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-D := utils
+# DESCRIPTION: This package exports several common functions to be used
+#              by SiLT Perl programs.
+package SiltCommon;
 
-$(D)_TARGETS :=	$(D)/grep-recursive					\
-		$(D)/path						\
-		$(D)/replace						\
-		$(D)/replaceline					\
-		$(D)/whereiz
+use 5;
 
-$(D)_PM :=	$(D)/SiltCommon.pm
+# enable perl's safety info
+use strict;
+use warnings;
 
-$(D)/all:
+use Term::ANSIColor;
 
-$(D)/clean: CDIR := $(D)
+require Exporter;
 
-$(D)/clean:
-	rm -f $(CDIR)/*~
+our @ISA = qw(Exporter);
 
-$(D)/install:	$(foreach t,$($(D)_TARGETS),$(t).bininstall)		\
-		$(foreach pm,$($(D)_PM),$(pm).pminstall)
+our @EXPORT_OK = ();
 
-$(D)/realclean: CDIR := $(D)
+our @EXPORT = qw(setverbose verbose
+		 setnorun norun
+		 printcmd runcmd runcmd_backtics);
 
-$(D)/realclean: $(D)/clean
+our $VERSION = "0.01";
+
+# Run commands
+BEGIN {
+  my $verbose = 0;
+  my $norun = 0;
+
+  sub setverbose{ $verbose = shift @_; }
+  sub verbose{ return $verbose; }
+  sub setnorun{ $norun = shift @_; }
+  sub norun{ return $norun; }
+
+  sub printcmd{
+    my $cmd = shift @_;
+    print color "blue bold";
+    print "CMD: " . $cmd . "\n";
+    print color "reset";
+  }
+
+  sub runcmd{
+    my $cmd = shift @_;
+    if($verbose){ printcmd($cmd); }
+    if(!$norun){ system($cmd); }
+  }
+
+  sub runcmd_backtics{
+    my $cmd = shift @_;
+    if($verbose){ printcmd($cmd); }
+    if(!$norun){ return `$cmd`; }
+    return "";
+  }
+}
+
+1;
+__END__

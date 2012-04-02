@@ -33,12 +33,13 @@
 use strict;
 use warnings;
 
+use SiltCommon;
+
 # globals
 my $search = "";
 my @ignoreDirs;
 my @ignoreFileTypes;
 my @fileExts;
-my $verbosity = 0;
 my @files;
 my $grep = "grep -H -n";
 
@@ -73,8 +74,8 @@ else{
 }
 
 # Run find command and store the results to @files
-@files = split /\n/, runcmd($cmd);
-if($verbosity >= 2){
+@files = split /\n/, SiltCommon::runcmd_backtics($cmd);
+if(SiltCommon::verbose()){
   print "Will search these files ...\n";
   foreach $f (@files){
     print "  [" . $f . "]\n";
@@ -83,23 +84,17 @@ if($verbosity >= 2){
 
 # Grep the files in @files for $search
 foreach $f (@files){
-  system($grep . " " . $search . " " . $f);
+  SiltCommon::runcmd($grep . " '" . $search . "' " . $f);
 }
 exit(0);
-
-# Perform a command and return the result.
-sub runcmd{
-  my $cmd = shift(@_);
-  if($verbosity >= 1){ print "CMD: " . $cmd . "\n"; }
-  return `$cmd`;
-}
 
 # A function to parse command line arguments.
 sub parsecla{
   my $arg;
   foreach $arg(@ARGV){
     if($arg eq "--help" || $arg eq "-h"){ usage(); exit(0); }
-    elsif($arg =~ /--verbosity=(\d+)/){ $verbosity = $1; }
+    elsif($arg eq "--verbose"){ SiltCommon::setverbose(1); }
+    elsif($arg eq "--norun"){ SiltCommon::setnorun(1); }
     elsif($arg =~ /^--ignore-dir=(.+)/){ push(@ignoreDirs, (split /,/, $1)); }
     elsif($arg =~ /^--ignore-ft=(.+)/){
       push(@ignoreFileTypes, (split /,/, $1));
@@ -136,7 +131,8 @@ OPTIONS:
                       unless the item starts './', in which case only a
                       directory with the full path will be ignored
   --ignore-ft=<list>  ignore files with the listed extensions
+  --norun             do not run commands, most useful with --verbose
   --regex             treat search as a regular expression
-  --verbosity=<0-2>   enable verbosity
+  --verbose           enable verbose output
 ";
 }

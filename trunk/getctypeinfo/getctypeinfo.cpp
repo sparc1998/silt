@@ -48,6 +48,36 @@
 #define COL_2_LEN  4
 #define COL_3_LEN  UINT64_T_MAX_DIGITS
 #define COL_4_LEN  UINT64_T_MAX_DIGITS
+#define COL_5_LEN  12
+
+/// Print usage information.
+void usage(std::ostream& o){
+  o << "USAGE: getctypeinfo [OPTIONS]\n"
+    "DESCRIPTION: Prints information about C types on the local machine.\n"
+    "             This program is part of the SiLT project:\n"
+    "             http://code.google.com/p/silt\n"
+    "OPTIONS:\n"
+    "  --help,-h              print this help message\n";
+}
+
+/// Parses command line arguments.
+void parseCla(int argc, char** argv){
+  unsigned i;
+
+  for(i = 1; i < (unsigned)argc; ++i){
+    char* arg = argv[i];
+    if(arg[0] == '-'){
+      if(std::string("--help") == arg || std::string("-h") == arg){
+	usage(std::cout);
+	exit(0);
+      }
+      else{
+	myerror("Illegal argument: " << arg);
+      }
+    }
+    else{ myerror("Illegal argument: " << arg); }
+  }
+}
 
 /// Get the max value for the signed integral type.
 template <class Type> Type getSignedIntegralTypeMax(){
@@ -78,7 +108,8 @@ template <class Type> Type getUnsignedIntegralTypeMin(){ return 0; }
 
 /// Print information for an integral type.
 template <class Type> void printIntegralType(std::string typeName,
-					     bool isSigned){
+					     bool isSigned,
+					     const char* specifier){
   size_t size;
   std::cout << typeName;
   size = typeName.size();
@@ -100,6 +131,11 @@ template <class Type> void printIntegralType(std::string typeName,
 			    getUnsignedIntegralTypeMax<Type>());
   size = str.size();
   if(size < COL_4_LEN){ std::cout << std::string(COL_4_LEN - size, ' '); }
+  std::cout << str << " ";
+
+  str = specifier;
+  size = str.size();
+  if(size < COL_5_LEN){ std::cout << std::string(COL_5_LEN - size, ' '); }
   std::cout << str << "\n";
 }
 
@@ -128,6 +164,11 @@ void printCharType(std::string typeName, bool isSigned){
      (int)getUnsignedIntegralTypeMax<unsigned char>());
   size = str.size();
   if(size < COL_4_LEN){ std::cout << std::string(COL_4_LEN - size, ' '); }
+  std::cout << str << " ";
+
+  str = (isSigned ? "%hhd" : "%hhu");
+  size = str.size();
+  if(size < COL_5_LEN){ std::cout << std::string(COL_5_LEN - size, ' '); }
   std::cout << str << "\n";
 }
 
@@ -156,12 +197,18 @@ void printVoidPtrType(){
   for(int i=0; i < numOfHex; ++i){ str += "f"; }
   size = str.size();
   if(size < COL_4_LEN){ std::cout << std::string(COL_4_LEN - size, ' '); }
+  std::cout << str << " ";
+
+  str = "%p";
+  size = str.size();
+  if(size < COL_5_LEN){ std::cout << std::string(COL_5_LEN - size, ' '); }
   std::cout << str << "\n";
 }
 
 /// Print information for the float type.
 template <class Type> void printFloatingPointType(std::string typeName,
-						  Type min, Type max){
+						  Type min, Type max,
+						  const char* specifier){
   std::string str = typeName;
   std::cout << str;
   size_t size = str.size();
@@ -181,11 +228,18 @@ template <class Type> void printFloatingPointType(std::string typeName,
   str = silt::fp2str<Type>(max);
   size = str.size();
   if(size < COL_4_LEN){ std::cout << std::string(COL_4_LEN - size, ' '); }
+  std::cout << str << " ";
+
+  str = specifier;
+  size = str.size();
+  if(size < COL_5_LEN){ std::cout << std::string(COL_5_LEN - size, ' '); }
   std::cout << str << "\n";
 }
 
 /// Print out information for several types.
 int main(int argc, char** argv){
+  parseCla(argc, argv);
+
   std::string str = "type";
   std::cout << str << std::string(COL_1_LEN - str.size() + 1, ' ');
   str = "bits";
@@ -193,25 +247,27 @@ int main(int argc, char** argv){
   str = "min";
   std::cout << str << std::string(COL_3_LEN - str.size() + 1, ' ');
   str = "max";
+  std::cout << str << std::string(COL_4_LEN - str.size() + 1, ' ');
+  str = "printf/scanf";
   std::cout << str << "\n";
 
   printCharType("char", true);
   printCharType("unsigned char", false);
-  printIntegralType<short>("short", true);
-  printIntegralType<unsigned short>("unsigned short", false);
-  printIntegralType<int>("int", true);
-  printIntegralType<unsigned>("unsigned", false);
-  printIntegralType<long>("long", true);
-  printIntegralType<unsigned long>("unsigned long", false);
-  printIntegralType<long long>("long long", true);
-  printIntegralType<unsigned long long>("unsigned long long", false);
-  printFloatingPointType<float>("float", FLT_MIN, FLT_MAX);
-  printFloatingPointType<double>("double", DBL_MIN, DBL_MAX);
-  printFloatingPointType<long double>("long double", LDBL_MIN, LDBL_MAX);
+  printIntegralType<short>("short", true, "%hd");
+  printIntegralType<unsigned short>("unsigned short", false, "%hu");
+  printIntegralType<int>("int", true, "%d");
+  printIntegralType<unsigned>("unsigned", false, "%u");
+  printIntegralType<long>("long", true, "%ld");
+  printIntegralType<unsigned long>("unsigned long", false, "%lu");
+  printIntegralType<long long>("long long", true, "%lld");
+  printIntegralType<unsigned long long>("unsigned long long", false, "%llu");
+  printFloatingPointType<float>("float", FLT_MIN, FLT_MAX, "%f");
+  printFloatingPointType<double>("double", DBL_MIN, DBL_MAX, "%lf");
+  printFloatingPointType<long double>("long double", LDBL_MIN, LDBL_MAX, "%Lf");
   printVoidPtrType();
-  printIntegralType<size_t>("size_t", false);
-  printIntegralType<ssize_t>("ssize_t", true);
-  printIntegralType<ptrdiff_t>("ptrdiff_t", true);
+  printIntegralType<size_t>("size_t", false, "%zu");
+  printIntegralType<ssize_t>("ssize_t", true, "%zd");
+  printIntegralType<ptrdiff_t>("ptrdiff_t", true, "%td");
 
   return 0;
 }

@@ -29,6 +29,9 @@
 
 using namespace silt;
 
+// This test program takes one argument, an output directory. If
+// successful, the graph creates a file mygraph.png in the output
+// directory.
 int main(int argc, char** argv){
   myassert(argc == 2, "Wrong number of arguments.");
   char* outputDir = argv[1];
