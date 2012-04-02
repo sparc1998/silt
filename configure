@@ -54,7 +54,8 @@ my @requiredBins =   ( "ar",
 		       "gnuplot",
 		       "grep",
 		       "install" );
-my @requiredLibs =   ( "librt" );
+my @requiredLibs =   ( "librt",
+		       "libxerces-c" );
 my @requiredHFiles = ( "alloca.h",
 		       "ctype.h",
 		       "fcntl.h",

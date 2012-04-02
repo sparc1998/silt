@@ -32,34 +32,28 @@
 use strict;
 use warnings;
 use File::Basename;
+use SiltCommon;
 
 # Global variables
 my @inputFiles;
 my @fromStrs;
 my @toStrs;
-my $verbose = 0;
 
 main();
 exit(0);
 
-# Runs a command. The output is not placed on stdout and stderr.
-sub runcmd{
-  my ($cmd) = @_;
-  if($verbose){ print "CMD: " . $cmd . "\n"; }
-  `$cmd`;
-}
-
 # Parse command line arguments.
 sub parsecla{
-  if($#ARGV == 0 && ($ARGV[0] eq "--help" || $ARGV[0] eq "-h")){
-    usage();
-    exit(0);
+  my $i;
+  for($i = 0; $i <= $#ARGV && $ARGV[$i] ne "--" && ($ARGV[$i] =~ /^-/); ++$i){
+    if($ARGV[$i] eq "--help" || $ARGV[$i] eq "-h"){ usage(); exit(0); }
+    elsif($ARGV[$i] eq "--verbose") { SiltCommon::setverbose(1); }
+    elsif($ARGV[$i] eq "--norun") { SiltCommon::setnorun(1); }
   }
 
   my $foundFiles = 0;
   my $getToStr = 0;
-  my $i = 0;
-  for($i=0; $i <= $#ARGV; ++$i){
+  for(; $i <= $#ARGV; ++$i){
     if(!$foundFiles){
       if($ARGV[$i] eq "--"){ $foundFiles = 1; }
       else{
@@ -90,33 +84,41 @@ sub main{
     while(-e $tmpFile){ $tmpFile = $tmpFile . int(rand(10)); }
     # In order to get the same access control, copy the original file to
     # the tmp file first
-    runcmd("cp -a " . $inputFiles[$i] . " " . $tmpFile);
-    if(open(RFH, $inputFiles[$i])){
-      if($verbose){ print "Opened " . $inputFiles[$i] . " for reading\n"; }
-      if(open(WFH, "> " . $tmpFile)){
-	if($verbose){ print "Opened " . $inputFiles[$i] . " for writing\n"; }
+    SiltCommon::runcmd("cp -a " . $inputFiles[$i] . " " . $tmpFile);
+    if(SiltCommon::norun() || open(RFH, $inputFiles[$i])){
+      if(!SiltCommon::norun() && SiltCommon::verbose()){
+	print "Opened " . $inputFiles[$i] . " for reading\n";
+      }
+      if(SiltCommon::norun() || open(WFH, "> " . $tmpFile)){
+	if(!SiltCommon::norun() && SiltCommon::verbose()){
+	  print "Opened " . $tmpFile . " for writing\n";
+	}
 
 	# Peform replacement in tmp file
 	my $line;
 	my $fileChanged = 0;
-	while($line = <RFH>){
-	  my $j;
-	  for($j=0; $j <= $#fromStrs; ++$j){
-	    $_ = $line;
-	    if(s/$fromStrs[$j]/$toStrs[$j]/g){ $fileChanged = 1; }
-	    $line = $_;
+	if(!SiltCommon::norun()){
+	  while($line = <RFH>){
+	    my $j;
+	    for($j=0; $j <= $#fromStrs; ++$j){
+	      $_ = $line;
+	      if(s/$fromStrs[$j]/$toStrs[$j]/g){ $fileChanged = 1; }
+	      $line = $_;
+	    }
+	    print WFH $line;
 	  }
-	  print WFH $line;
 	}
-	close WFH;
-	close RFH;
+	if(!SiltCommon::norun()){
+	  close WFH;
+	  close RFH;
+	}
 	if($fileChanged){ print "Changed " . $inputFiles[$i] . "\n"; }
 
 	# Remove original file
-	runcmd("rm -f " . $inputFiles[$i]);
+	SiltCommon::runcmd("rm -f " . $inputFiles[$i]);
 
 	# Mv tmp file to original
-	runcmd("mv -f " . $tmpFile . " " . $inputFiles[$i]);
+	SiltCommon::runcmd("mv -f " . $tmpFile . " " . $inputFiles[$i]);
       }
       else{
 	close RFH;
@@ -136,5 +138,7 @@ DESCRIPTION: Replace from strings with to strings in the specified files.
              http://code.google.com/p/silt
 OPTIONS:
   --help,-h  print this message
+  --norun    do not run commands, most useful with --verbose
+  --verbose  enable verbose output
 ";
 }

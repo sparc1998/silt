@@ -1,0 +1,51 @@
+Developer's Handbook
+--------------------
+
+Table of Contents
+* [MAKE]   Makefile
+* [NEWSW]  Adding new software
+
+== Makefile ==                                              [MAKE]
+
+* To list useful make targets, run "make help"
+
+== Adding new software ==                                   [NEWSW]
+
+* New C/C++ programs or libraries
+  * Create a new program/project subdirectory S.
+  * Add $S to SUBDIRS in makefile
+  * Create a project makefile $S/local.mk, e.g., see
+    runcmd/local.mk.
+    * Create the following targets: $S/all, $S/clean, $S/install, and
+      $S/realclean
+    * You probably also want to add a directive such as:
+      include $(subst .c,.d,$(wildcard $(D)/*.c))
+    * The silt makefile contains many useful build rules. Look at other
+      makefiles for examples.
+  * To add tests:
+    * Create test/$S
+    * Add test/$S to TEST_SUBDIRS in makefile.
+    * Create a test makefile test/$S/local.mk, e.g.,
+      see test/siltgraph/linegraph-000/local.mk.
+  * Add the project copyright and license to all new files.
+* New Perl programs
+  * Add the program P in the utils directory.
+  * Add $P to $(D)_TARGETS in utils/local.mk.
+  * Please use 'use strict;' and 'use warnings;' with all perl programs.
+  * Include the SiltCommon.pm module for common script functions.
+* This project uses doxygen. So, if source comments are formatted
+  correctly, they will show up in the generated doxygen.
+* ATTN comments
+  * Run "make findattn" to find attention comments.
+  * Add ATTN comments for TODO items, e.g., "// ATTN: "
+* Include files
+  * The include directory is for public/external APIs.
+  * The include_internal directory is for internal header file definitions.
+  * Inside include and include_internal, there is a c++ directory for
+    C++ header files.
+* Important header files
+  * include/SiltCError.h
+  * include/SiltCppError.h
+* Usage information
+  * Try to follow the usage format of current programs.
+  * Reference the SiLT project and http://code.google.com/p/silt

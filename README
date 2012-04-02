@@ -3,5 +3,22 @@
   ./configure --prefix=<install dir>
   make
   make install
+  // Set the PERL5LIB environment variable to <install dir>/lib.
 
 * './configure --help' will list other configure options.
+
+* General usage
+  * --help will list the usage information for all binaries
+
+* Executables
+  * getctypeinfo: list information about common C types on the local machine
+  * grep-recursive: recursive grep with useful options.
+  * path: print the current path environment variable in an easy to read form.
+  * replace: text string replacement utility
+  * replaceline: text line replacement utility
+  * runcmd: run commands under various useful settings
+  * whereiz: a utility to search the path environment variable for binaries
+
+* Libraries
+  * libsiltgraph.a: a library to easily create graphs
+    * see test/siltgraph/* for example usage
