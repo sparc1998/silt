@@ -152,7 +152,6 @@ sub main{
 
 # Check if a library is installed on the system
 sub checkForLib{
-  # ATTN: implement
   my $lib = shift @_;
   $lib =~ s/^lib//;
   my $search = "-l" . $lib;

@@ -31,8 +31,6 @@
 #include <string>
 #include <iostream>
 
-// ATTN: combine linegraph and histogram
-
 namespace silt{
   class SiltGraph{
   public:
