@@ -43,6 +43,7 @@ SUBDIRS :=							\
 			include_internal			\
 			include_internal/c++			\
 			runcmd					\
+			share					\
 			siltgraph				\
 			utils
 TEST_SUBDIRS :=							\
@@ -52,9 +53,9 @@ TEST_SUBDIRS :=							\
 BIN_DIR := $(PREFIX)/bin
 INCLUDE_DIR := $(PREFIX)/include
 LIB_DIR := $(PREFIX)/lib
+SHARE_DIR := $(PREFIX)/share/silt
 
 # Flags
-# _GNU_SOURCE is required for cpu affinity stuff
 CPPFLAGS := $(SYS_CPPFLAGS) -Iinclude -Iinclude_internal
 CFLAGS := $(SYS_CFLAGS) -Wall
 CXXFLAGS := $(SYS_CXXFLAGS) -Wall
@@ -80,6 +81,7 @@ INSTALL_BIN =	$(INSTALL) -m 755 $(1) $(BIN_DIR)
 INSTALL_CH =	$(INSTALL) -m 644 $(1) $(INCLUDE_DIR)
 INSTALL_CPPH =	$(INSTALL) -m 644 $(1) $(INCLUDE_DIR)/c++
 INSTALL_LIB =	$(INSTALL) -m 644 $(1) $(LIB_DIR)
+INSTALL_SHARE =	$(INSTALL) -m 644 $(1) $(SHARE_DIR)
 
 # Set all as the default target
 all:
@@ -147,6 +149,8 @@ installdirs:
 	chmod 755 $(INCLUDE_DIR)/c++
 	mkdir -p $(LIB_DIR)
 	chmod 755 $(LIB_DIR)
+	mkdir -p $(SHARE_DIR)
+	chmod 755 $(SHARE_DIR)
 
 %.d: %.c
 	$(call C2D,$@,$<)
@@ -177,5 +181,8 @@ installdirs:
 
 %.pm.pminstall: %.pm
 	$(call INSTALL_LIB,$<)
+
+%.shareinstall: %
+	$(call INSTALL_SHARE,$*)
 
 .PHONY: doxygen clean realclean all
